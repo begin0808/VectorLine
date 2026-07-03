@@ -83,22 +83,37 @@ const statContours = document.getElementById('stat-contours');
 const statNodes = document.getElementById('stat-nodes');
 
 // 1. OpenCV.js loading orchestration
+let openCVInitialized = false;
+
 function checkOpenCVReady() {
-  if (window.opencvReady) {
+  if (window.opencvReady && typeof cv !== 'undefined' && cv.Mat) {
     onOpenCVLoaded();
-  } else {
-    document.addEventListener('opencv-ready', onOpenCVLoaded);
-    // Fallback if event was already fired
-    setTimeout(() => {
-      if (typeof cv !== 'undefined' && cv.Mat) {
-        window.opencvReady = true;
-        onOpenCVLoaded();
-      }
-    }, 1000);
+    return;
   }
+
+  document.addEventListener('opencv-ready', onOpenCVLoaded);
+
+  // Robust fallback: some builds signal readiness differently, so poll until the
+  // cv runtime is actually usable rather than trusting a single timed check.
+  const startTime = Date.now();
+  const poll = setInterval(() => {
+    if (typeof cv !== 'undefined' && cv.Mat) {
+      clearInterval(poll);
+      window.opencvReady = true;
+      onOpenCVLoaded();
+    } else if (Date.now() - startTime > 30000) {
+      clearInterval(poll);
+      const loadingText = document.getElementById('loading-text');
+      if (loadingText) {
+        loadingText.textContent = 'OpenCV.js 載入逾時，請檢查網路連線後重新整理頁面。';
+      }
+    }
+  }, 300);
 }
 
 function onOpenCVLoaded() {
+  if (openCVInitialized) return;
+  openCVInitialized = true;
   console.log("OpenCV.js successfully loaded into UI.");
   loadingScreen.classList.add('fade-out');
   // Enable drag and drop functionality

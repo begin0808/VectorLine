@@ -27,8 +27,9 @@
       }
     };
   </script>
-  <!-- Load OpenCV.js 4.13 asynchronously (upgraded from 4.10 for WASM SIMD performance boost) -->
-  <script src="https://cdn.jsdelivr.net/npm/@opencvjs/web@4.13.0-release.1/dist/opencv.js" async type="text/javascript" id="opencv-js"></script>
+  <!-- Load OpenCV.js 4.13 asynchronously (official build; honors the pre-defined global Module above) -->
+  <script src="https://docs.opencv.org/4.13.0/opencv.js" async type="text/javascript" id="opencv-js"
+          onerror="document.getElementById('loading-text') && (document.getElementById('loading-text').textContent = '載入 OpenCV.js 失敗，請檢查網路連線後重新整理頁面。')"></script>
 </head>
 <body>
 

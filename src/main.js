@@ -286,7 +286,7 @@ sliderCConstant.addEventListener('input', (e) => {
 });
 
 sliderSimplify.addEventListener('input', (e) => {
-  valSimplify.textContent = parseFloat(e.target.value).toFixed(1) + '%';
+  valSimplify.textContent = parseFloat(e.target.value).toFixed(1) + ' px';
   triggerProcessing();
 });
 
@@ -455,7 +455,7 @@ function applyPreset(denoise, blockSize, cConstant, simplify, minArea, brightnes
   updateSliderValue(sliderDenoise, valDenoise, denoise);
   updateSliderValue(sliderBlocksize, valBlocksize, blockSize);
   updateSliderValue(sliderCConstant, valCConstant, cConstant);
-  updateSliderValue(sliderSimplify, valSimplify, simplify.toFixed(1) + '%');
+  updateSliderValue(sliderSimplify, valSimplify, simplify.toFixed(1) + ' px');
   sliderSimplify.value = simplify;
   updateSliderValue(sliderMinArea, valMinArea, minArea, ' px');
   updateSliderValue(sliderBrightness, valBrightness, brightness);
@@ -651,7 +651,11 @@ function processImage() {
     cv.findContours(binary, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
     // 5.5 Vector Optimization and SVG String Generation
-    const simplifyVal = parseFloat(sliderSimplify.value) / 100.0;
+    // Absolute pixel tolerance (NOT perimeter-relative): a percentage-of-perimeter
+    // epsilon over-simplifies large contours — the huge outer contour of a dense
+    // sketch would collapse into long straight chords slashing across the image.
+    // A fixed pixel tolerance simplifies every contour uniformly so paths hug the lines.
+    const simplifyVal = parseFloat(sliderSimplify.value);
     const minAreaVal = parseInt(sliderMinArea.value);
     let selectedColor = '#ff0000';
     for (const radio of colorRadios) {
@@ -677,11 +681,10 @@ function processImage() {
         continue;
       }
 
-      // Simplify nodes using Ramer-Douglas-Peucker (approxPolyDP)
+      // Simplify nodes using Ramer-Douglas-Peucker (approxPolyDP).
+      // epsilon is an absolute pixel tolerance; 0 disables simplification (max fidelity).
       const approx = new cv.Mat();
-      const perimeter = cv.arcLength(contour, true);
-      const epsilon = simplifyVal * perimeter;
-      cv.approxPolyDP(contour, approx, epsilon, true);
+      cv.approxPolyDP(contour, approx, simplifyVal, true);
 
       if (approx.rows >= 2) {
         pathsCount++;

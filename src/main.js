@@ -642,9 +642,13 @@ function processImage() {
     displayMat.delete();
 
     // 5.4 Extract Vector Contours
+    // Use RETR_LIST (not RETR_EXTERNAL) so interior detail is preserved: RETR_EXTERNAL
+    // keeps only the outermost silhouette of each connected mass, discarding all inner
+    // lines (faces, clothing, text). RETR_LIST retrieves every contour so the SVG
+    // faithfully reproduces the black/white preview.
     contours = new cv.MatVector();
     hierarchy = new cv.Mat();
-    cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    cv.findContours(binary, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
     // 5.5 Vector Optimization and SVG String Generation
     const simplifyVal = parseFloat(sliderSimplify.value) / 100.0;

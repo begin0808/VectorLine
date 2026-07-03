@@ -189,7 +189,15 @@
                 <span id="val-min-area" class="slider-val">15 px</span>
               </div>
               <input type="range" id="slider-min-area" min="0" max="500" step="5" value="15">
-              <p class="control-desc">過濾小於此面積的孤立雜點與碎塊。調高可清除紋理雜訊（如格子衣物），大幅減少路徑數。</p>
+              <p class="control-desc">過濾小於此面積的孤立雜點與碎塊。調高可清除紋理雜訊（如格子衣物），大幅減少路徑數。（單線模式下改以線長過濾）</p>
+            </div>
+
+            <div class="slider-wrapper" style="margin-top: 14px;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="checkbox-smooth">
+                <span>曲線平滑 (Smooth Curves)</span>
+              </label>
+              <p class="control-desc" style="margin-top: 4px;">將折線節點轉為平滑貝茲曲線，線條更順、雷切機更不易抖動。轉角較多的圖案效果最明顯。</p>
             </div>
           </div>
 
@@ -208,7 +216,7 @@
                 <input type="radio" name="cut-mode" value="centerline">
                 <span class="mode-box">
                   <span class="mode-title">單線模式 (Centerline)</span>
-                  <span class="mode-desc">將線條收縮細線化為 1px 中心骨架路徑，雷射僅沿中線切割一次。</span>
+                  <span class="mode-desc">將線條細線化並追蹤為單一中心線（非雙描邊），雷射沿線只切一次，最省時、最適合線稿切割。</span>
                 </span>
               </label>
               <label class="mode-option">

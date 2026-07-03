@@ -48,6 +48,9 @@ const sizeInputsWrapper = document.getElementById('size-inputs-wrapper');
 // Invert color option
 const checkboxInvertBinary = document.getElementById('checkbox-invert-binary');
 
+// Curve smoothing option
+const checkboxSmooth = document.getElementById('checkbox-smooth');
+
 // Color choice
 const colorRadios = document.getElementsByName('svg-color');
 
@@ -331,6 +334,8 @@ inputPhysWidth.addEventListener('input', () => {
 
 checkboxInvertBinary.addEventListener('change', () => triggerProcessing());
 
+checkboxSmooth.addEventListener('change', () => triggerProcessing());
+
 function updatePhysicalHeight() {
   if (!imgElement || !imgElement.naturalWidth) return;
   const w = imgElement.naturalWidth;
@@ -505,6 +510,119 @@ function triggerProcessing() {
   }, 120);
 }
 
+// ---- Vector path helpers (skeleton tracing, simplification, smoothing) ----
+
+// Trace a 1px skeleton bitmap (white lines on black) into open polylines. Used for the
+// true single-line centerline output so the laser follows the middle of each stroke once.
+function traceSkeleton(mat) {
+  const cols = mat.cols, rows = mat.rows;
+  const data = mat.data; // Uint8Array, 0 or 255
+  const visited = new Uint8Array(cols * rows);
+  const idx = (x, y) => y * cols + x;
+  const isLine = (x, y) => x >= 0 && y >= 0 && x < cols && y < rows && data[idx(x, y)] > 0;
+  const offsets = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]];
+
+  function countNeighbors(x, y) {
+    let c = 0;
+    for (const [dx, dy] of offsets) if (isLine(x + dx, y + dy)) c++;
+    return c;
+  }
+  function walk(sx, sy) {
+    const pts = [[sx, sy]];
+    visited[idx(sx, sy)] = 1;
+    let x = sx, y = sy;
+    while (true) {
+      let next = null;
+      for (const [dx, dy] of offsets) {
+        const nx = x + dx, ny = y + dy;
+        if (isLine(nx, ny) && !visited[idx(nx, ny)]) { next = [nx, ny]; break; }
+      }
+      if (!next) break;
+      visited[idx(next[0], next[1])] = 1;
+      pts.push(next);
+      x = next[0]; y = next[1];
+    }
+    return pts;
+  }
+
+  const polylines = [];
+  // Pass 1: start from stroke endpoints (exactly one neighbour) so lines trace end-to-end.
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (isLine(x, y) && !visited[idx(x, y)] && countNeighbors(x, y) === 1) {
+        polylines.push(walk(x, y));
+      }
+    }
+  }
+  // Pass 2: trace remaining pixels (closed loops / leftover junction branches).
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (isLine(x, y) && !visited[idx(x, y)]) {
+        polylines.push(walk(x, y));
+      }
+    }
+  }
+  return polylines;
+}
+
+// Ramer–Douglas–Peucker simplification for a plain [[x,y], ...] array (used for centerlines,
+// mirroring cv.approxPolyDP which we use for closed contours). epsilon in pixels; 0 = off.
+function rdpSimplify(points, epsilon) {
+  if (epsilon <= 0 || points.length < 3) return points;
+  const sqSegDist = (p, a, b) => {
+    let dx = b[0] - a[0], dy = b[1] - a[1];
+    if (dx !== 0 || dy !== 0) {
+      const t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy);
+      if (t > 1) { return (p[0] - b[0]) ** 2 + (p[1] - b[1]) ** 2; }
+      if (t > 0) { dx = p[0] - (a[0] + t * dx); dy = p[1] - (a[1] + t * dy); return dx * dx + dy * dy; }
+    }
+    return (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2;
+  };
+  const eps2 = epsilon * epsilon;
+  const keep = new Uint8Array(points.length);
+  keep[0] = keep[points.length - 1] = 1;
+  const stack = [[0, points.length - 1]];
+  while (stack.length) {
+    const [first, last] = stack.pop();
+    let maxD = 0, index = -1;
+    for (let i = first + 1; i < last; i++) {
+      const d = sqSegDist(points[i], points[first], points[last]);
+      if (d > maxD) { maxD = d; index = i; }
+    }
+    if (maxD > eps2 && index !== -1) {
+      keep[index] = 1;
+      stack.push([first, index], [index, last]);
+    }
+  }
+  const out = [];
+  for (let i = 0; i < points.length; i++) if (keep[i]) out.push(points[i]);
+  return out;
+}
+
+// Convert a point array to an SVG path 'd' string. When smooth is on, render Catmull-Rom
+// cubic Béziers passing through every node; otherwise straight line segments.
+function pointsToPathD(pts, closed, smooth) {
+  const n = pts.length;
+  if (n < 2) return '';
+  if (!smooth || n < 3) {
+    let d = `M ${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 1; i < n; i++) d += ` L ${pts[i][0]} ${pts[i][1]}`;
+    if (closed) d += ' Z';
+    return d;
+  }
+  const at = (i) => closed ? pts[((i % n) + n) % n] : pts[Math.max(0, Math.min(n - 1, i))];
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  const segs = closed ? n : n - 1;
+  for (let i = 0; i < segs; i++) {
+    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2[0]} ${p2[1]}`;
+  }
+  if (closed) d += ' Z';
+  return d;
+}
+
 // 5. Image Processing and Vectorization Engine (OpenCV.js based)
 function processImage() {
   if (typeof cv === 'undefined' || !cv.Mat) {
@@ -650,22 +768,13 @@ function processImage() {
     cv.imshow('output-canvas', displayMat);
     displayMat.delete();
 
-    // 5.4 Extract Vector Contours
-    // Use RETR_LIST (not RETR_EXTERNAL) so interior detail is preserved: RETR_EXTERNAL
-    // keeps only the outermost silhouette of each connected mass, discarding all inner
-    // lines (faces, clothing, text). RETR_LIST retrieves every contour so the SVG
-    // faithfully reproduces the black/white preview.
-    contours = new cv.MatVector();
-    hierarchy = new cv.Mat();
-    cv.findContours(binary, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
-
-    // 5.5 Vector Optimization and SVG String Generation
+    // 5.4 / 5.5 Vector extraction, optimization and SVG generation.
     // Absolute pixel tolerance (NOT perimeter-relative): a percentage-of-perimeter
     // epsilon over-simplifies large contours — the huge outer contour of a dense
     // sketch would collapse into long straight chords slashing across the image.
-    // A fixed pixel tolerance simplifies every contour uniformly so paths hug the lines.
     const simplifyVal = parseFloat(sliderSimplify.value);
     const minAreaVal = parseInt(sliderMinArea.value);
+    const smoothMode = checkboxSmooth.checked;
     let selectedColor = '#ff0000';
     for (const radio of colorRadios) {
       if (radio.checked) {
@@ -684,54 +793,73 @@ function processImage() {
       }
     }
 
-    let allSubpaths = [];
-    let totalNodes = 0;
-    let pathsCount = 0;
+    // Centerline outputs open single-line polylines, which have no area to fill —
+    // force stroke rendering so the fill toggle can't produce an empty result there.
+    const isCenterline = selectedMode === 'centerline';
+    const useFill = fillMode && !isCenterline;
+
     const width = src.cols;
     const height = src.rows;
+    let paths = []; // each: { pts: [[x,y], ...], closed: boolean }
+    let totalNodes = 0;
 
-    for (let i = 0; i < contours.size(); ++i) {
-      const contour = contours.get(i);
-
-      // Calculate contour area to filter small dust/spots
-      const area = cv.contourArea(contour);
-      if (area < minAreaVal) {
-        contour.delete();
-        continue;
-      }
-
-      // Simplify nodes using Ramer-Douglas-Peucker (approxPolyDP).
-      // epsilon is an absolute pixel tolerance; 0 disables simplification (max fidelity).
-      const approx = new cv.Mat();
-      cv.approxPolyDP(contour, approx, simplifyVal, true);
-
-      if (approx.rows >= 2) {
-        pathsCount++;
-        totalNodes += approx.rows;
-
-        let pathData = [];
-        for (let j = 0; j < approx.rows; ++j) {
-          const x = approx.data32S[j * 2];
-          const y = approx.data32S[j * 2 + 1];
-          pathData.push(`${j === 0 ? 'M' : 'L'} ${x} ${y}`);
+    if (isCenterline) {
+      // True single centerline: trace the 1px skeleton into open polylines (one per
+      // stroke) instead of tracing around it (which would double every line). Filter
+      // by length — a zero-area line would always fail the area test — then simplify.
+      const minLen = Math.max(2, Math.round(minAreaVal / 5));
+      const polylines = traceSkeleton(binary);
+      for (const poly of polylines) {
+        if (poly.length < minLen) continue;
+        const simplified = rdpSimplify(poly, simplifyVal);
+        if (simplified.length >= 2) {
+          paths.push({ pts: simplified, closed: false });
+          totalNodes += simplified.length;
         }
-        pathData.push('Z'); // Close the vector loop
-        allSubpaths.push(pathData.join(' '));
       }
-
-      approx.delete();
-      contour.delete();
+    } else {
+      // Outline / Canny: trace closed contours. RETR_LIST keeps interior detail
+      // (RETR_EXTERNAL would drop everything but the outer silhouette).
+      contours = new cv.MatVector();
+      hierarchy = new cv.Mat();
+      cv.findContours(binary, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+      for (let i = 0; i < contours.size(); ++i) {
+        const contour = contours.get(i);
+        if (cv.contourArea(contour) < minAreaVal) {
+          contour.delete();
+          continue;
+        }
+        const approx = new cv.Mat();
+        cv.approxPolyDP(contour, approx, simplifyVal, true);
+        if (approx.rows >= 2) {
+          const pts = [];
+          for (let j = 0; j < approx.rows; ++j) {
+            pts.push([approx.data32S[j * 2], approx.data32S[j * 2 + 1]]);
+          }
+          paths.push({ pts, closed: true });
+          totalNodes += approx.rows;
+        }
+        approx.delete();
+        contour.delete();
+      }
     }
 
-    // Merge every contour into a single path. Fill mode uses fill-rule="evenodd" so
-    // nested contours become holes (solid areas stay solid, matching the B/W preview);
-    // stroke mode draws hairline outlines for laser cutting.
-    const combinedPath = allSubpaths.join(' ');
+    const pathsCount = paths.length;
+
+    // Build SVG. Fill merges closed contours into one fill-rule="evenodd" path so nested
+    // contours become holes (solid areas stay solid); stroke draws hairline outlines /
+    // centerlines. smoothMode renders Catmull-Rom Bézier curves through the nodes.
     let pathsSvgHtml = '';
-    if (combinedPath) {
-      pathsSvgHtml = fillMode
-        ? `  <path d="${combinedPath}" fill="${selectedColor}" fill-rule="evenodd" stroke="none" />\n`
-        : `  <path d="${combinedPath}" fill="none" stroke="${selectedColor}" stroke-width="1" />\n`;
+    if (useFill) {
+      const combined = paths.map(p => pointsToPathD(p.pts, true, smoothMode)).join(' ');
+      if (combined) {
+        pathsSvgHtml = `  <path d="${combined}" fill="${selectedColor}" fill-rule="evenodd" stroke="none" />\n`;
+      }
+    } else {
+      const combined = paths.map(p => pointsToPathD(p.pts, p.closed, smoothMode)).join(' ');
+      if (combined) {
+        pathsSvgHtml = `  <path d="${combined}" fill="none" stroke="${selectedColor}" stroke-width="1" />\n`;
+      }
     }
 
     // Wrap in standard SVG format

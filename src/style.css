@@ -202,19 +202,33 @@ body {
   font-size: 1.15rem; /* Scaled up */
 }
 
-/* Main Workspace Grid */
+/* Main Workspace: stacked top (controls) / bottom (previews) */
 .app-main {
-  display: grid;
-  grid-template-columns: 380px 1fr; /* Narrower settings, wider preview */
+  display: flex;
+  flex-direction: column;
   gap: 28px;
-  align-items: stretch; /* Stretch columns to match height */
 }
 
-@media (max-width: 1024px) {
-  .app-main {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
+/* Compact multi-column layout for the settings so the panel isn't a tall column */
+#settings-group {
+  columns: 300px;
+  column-gap: 32px;
+}
+
+#settings-group > * {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+/* Preset row and the download actions span the full width, above/below the columns */
+.preset-buttons-group,
+.action-buttons {
+  column-span: all;
+}
+
+/* Keep the upload drop zone at a sensible width instead of the full card */
+.controls-panel > .control-group {
+  max-width: 420px;
 }
 
 /* Cards Design */
@@ -546,8 +560,34 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .preview-panel {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 700px;
+}
+
+/* Two previews side by side (black/white lines + vector SVG) for easy comparison */
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.preview-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pane-header {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  padding: 4px 2px 12px;
 }
 
 .tabs-header {
@@ -595,13 +635,16 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .canvas-container, .svg-container {
   width: 100%;
-  height: 100%;
+  height: 560px;
   display: flex;
   align-items: flex-start; /* Top-align preview so it's visible without scrolling */
   justify-content: center;
   padding: 20px;
   overflow: auto;
   position: relative;
+  background: #f8fafc; /* Clean off-white bg */
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--bg-card-border);
 }
 
 #output-canvas {

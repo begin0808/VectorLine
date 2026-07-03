@@ -308,28 +308,23 @@
         </div>
       </section>
 
-      <!-- Right Column: Previews -->
+      <!-- Bottom Block: Previews shown side by side for easy comparison -->
       <section class="preview-panel card">
-        <!-- Tabs -->
-        <div class="tabs-header">
-          <button id="tab-binary" class="tab-btn active">1. 處理後黑白線條</button>
-          <button id="tab-svg" class="tab-btn">2. 向量 SVG 預覽</button>
-        </div>
-
-        <!-- Tab Content -->
-        <div class="tab-content">
+        <div class="preview-grid">
           <!-- Canvas Preview -->
-          <div id="content-binary" class="preview-box">
+          <div class="preview-pane">
+            <div class="pane-header">1. 處理後黑白線條</div>
             <div class="canvas-container">
               <canvas id="output-canvas"></canvas>
               <div id="empty-state-canvas" class="empty-state">
-                <p>尚未上傳圖片。請在左側上傳以開始。</p>
+                <p>尚未上傳圖片。請在上方上傳以開始。</p>
               </div>
             </div>
           </div>
 
           <!-- SVG Vector Preview -->
-          <div id="content-svg" class="preview-box hidden">
+          <div class="preview-pane">
+            <div class="pane-header">2. 向量 SVG 預覽</div>
             <div class="svg-container">
               <div id="svg-preview-wrapper">
                 <img id="svg-preview" class="hidden" alt="SVG 向量預覽">
@@ -338,7 +333,7 @@
                 <span>🖱️ 滾輪縮放 / 拖曳平移 | 雙擊重設</span>
               </div>
               <div id="empty-state-svg" class="empty-state">
-                <p>尚未上傳圖片。請在左側上傳以開始。</p>
+                <p>尚未上傳圖片。請在上方上傳以開始。</p>
               </div>
             </div>
           </div>

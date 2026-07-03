@@ -5,7 +5,6 @@
 let imgElement = document.createElement('img');
 let originalFile = null;
 let debounceTimeout = null;
-let activeTab = 'binary'; // 'binary' or 'svg'
 let lastSvgContent = ''; // For downloading
 
 // DOM Elements
@@ -67,11 +66,7 @@ const btnPresetPhoto = document.getElementById('btn-preset-photo');
 const btnPresetDigital = document.getElementById('btn-preset-digital');
 const btnResetDefaults = document.getElementById('btn-reset-defaults');
 
-// Tabs
-const tabBinary = document.getElementById('tab-binary');
-const tabSvg = document.getElementById('tab-svg');
-const contentBinary = document.getElementById('content-binary');
-const contentSvg = document.getElementById('content-svg');
+// Preview empty-state overlays
 const emptyStateCanvas = document.getElementById('empty-state-canvas');
 const emptyStateSvg = document.getElementById('empty-state-svg');
 
@@ -255,22 +250,6 @@ function resetImage() {
   resetZoomAndPan();
 }
 
-// 3. Tab navigation switcher
-tabBinary.addEventListener('click', () => {
-  activeTab = 'binary';
-  tabBinary.classList.add('active');
-  tabSvg.classList.remove('active');
-  contentBinary.classList.remove('hidden');
-  contentSvg.classList.add('hidden');
-});
-
-tabSvg.addEventListener('click', () => {
-  activeTab = 'svg';
-  tabSvg.classList.add('active');
-  tabBinary.classList.remove('active');
-  contentSvg.classList.remove('hidden');
-  contentBinary.classList.add('hidden');
-});
 
 // 4. Sliders bindings & triggers
 sliderDenoise.addEventListener('input', (e) => {

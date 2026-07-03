@@ -51,6 +51,9 @@ const checkboxInvertBinary = document.getElementById('checkbox-invert-binary');
 // Color choice
 const colorRadios = document.getElementsByName('svg-color');
 
+// Render mode choice (stroke outline vs solid fill)
+const renderModeRadios = document.getElementsByName('render-mode');
+
 // Cut mode choice
 const cutModeRadios = document.getElementsByName('cut-mode');
 
@@ -419,6 +422,11 @@ cutModeRadios.forEach(radio => {
   radio.addEventListener('change', () => triggerProcessing());
 });
 
+// Render mode radio update (stroke / fill)
+renderModeRadios.forEach(radio => {
+  radio.addEventListener('change', () => triggerProcessing());
+});
+
 // Download action buttons
 btnDownloadSvg.addEventListener('click', () => {
   if (!lastSvgContent) return;
@@ -466,7 +474,8 @@ function applyPreset(denoise, blockSize, cConstant, simplify, minArea, brightnes
 }
 
 btnPresetPhoto.addEventListener('click', () => {
-  applyPreset(8, 19, 4, 1.2, 30, 0, 0, 1);
+  // Higher Min Area (80) filters out texture noise (clothing patterns, shadows) common in photos.
+  applyPreset(8, 19, 4, 1.2, 80, 0, 0, 1);
 });
 
 btnPresetDigital.addEventListener('click', () => {
@@ -665,7 +674,17 @@ function processImage() {
       }
     }
 
-    let pathsSvgHtml = '';
+    // Fill mode fills solid regions (matches the B/W preview, good for engraving);
+    // stroke mode keeps hairline outlines (good for cutting). Read the current choice.
+    let fillMode = false;
+    for (const radio of renderModeRadios) {
+      if (radio.checked) {
+        fillMode = radio.value === 'fill';
+        break;
+      }
+    }
+
+    let allSubpaths = [];
     let totalNodes = 0;
     let pathsCount = 0;
     const width = src.cols;
@@ -673,7 +692,7 @@ function processImage() {
 
     for (let i = 0; i < contours.size(); ++i) {
       const contour = contours.get(i);
-      
+
       // Calculate contour area to filter small dust/spots
       const area = cv.contourArea(contour);
       if (area < minAreaVal) {
@@ -689,26 +708,30 @@ function processImage() {
       if (approx.rows >= 2) {
         pathsCount++;
         totalNodes += approx.rows;
-        
+
         let pathData = [];
         for (let j = 0; j < approx.rows; ++j) {
           const x = approx.data32S[j * 2];
           const y = approx.data32S[j * 2 + 1];
-          if (j === 0) {
-            pathData.push(`M ${x} ${y}`);
-          } else {
-            pathData.push(`L ${x} ${y}`);
-          }
+          pathData.push(`${j === 0 ? 'M' : 'L'} ${x} ${y}`);
         }
         pathData.push('Z'); // Close the vector loop
-        
-        const pathStr = pathData.join(' ');
-        // We set stroke-width suitable for laser cutting software (hairline width)
-        pathsSvgHtml += `  <path d="${pathStr}" fill="none" stroke="${selectedColor}" stroke-width="1" />\n`;
+        allSubpaths.push(pathData.join(' '));
       }
-      
+
       approx.delete();
       contour.delete();
+    }
+
+    // Merge every contour into a single path. Fill mode uses fill-rule="evenodd" so
+    // nested contours become holes (solid areas stay solid, matching the B/W preview);
+    // stroke mode draws hairline outlines for laser cutting.
+    const combinedPath = allSubpaths.join(' ');
+    let pathsSvgHtml = '';
+    if (combinedPath) {
+      pathsSvgHtml = fillMode
+        ? `  <path d="${combinedPath}" fill="${selectedColor}" fill-rule="evenodd" stroke="none" />\n`
+        : `  <path d="${combinedPath}" fill="none" stroke="${selectedColor}" stroke-width="1" />\n`;
     }
 
     // Wrap in standard SVG format

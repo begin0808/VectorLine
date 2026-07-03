@@ -188,8 +188,8 @@
                 <span>過濾雜點面積 (Min Area)</span>
                 <span id="val-min-area" class="slider-val">15 px</span>
               </div>
-              <input type="range" id="slider-min-area" min="0" max="100" step="5" value="15">
-              <p class="control-desc">過濾小於此面積的孤立雜點，使切割路徑更乾淨。</p>
+              <input type="range" id="slider-min-area" min="0" max="500" step="5" value="15">
+              <p class="control-desc">過濾小於此面積的孤立雜點與碎塊。調高可清除紋理雜訊（如格子衣物），大幅減少路徑數。</p>
             </div>
           </div>
 
@@ -221,9 +221,27 @@
             </div>
           </div>
 
-          <!-- Color Customization -->
+          <!-- Render Style + Color -->
           <div class="control-group">
-            <label class="group-label">6. 匯出路徑顏色</label>
+            <label class="group-label">6. 匯出樣式與顏色</label>
+
+            <div class="mode-selector" style="margin-bottom: 14px;">
+              <label class="mode-option">
+                <input type="radio" name="render-mode" value="stroke" checked>
+                <span class="mode-box">
+                  <span class="mode-title">描邊模式 (Stroke)</span>
+                  <span class="mode-desc">只描線條輪廓（細髮線），適合雷射切割沿線切。</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="render-mode" value="fill">
+                <span class="mode-box">
+                  <span class="mode-title">填色模式 (Fill)</span>
+                  <span class="mode-desc">實心區塊填滿顏色，外觀最接近黑白圖，適合雷射雕刻/上色。</span>
+                </span>
+              </label>
+            </div>
+
             <div class="color-options">
               <label class="color-radio">
                 <input type="radio" name="svg-color" value="#ff0000" checked>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VectorLine - 雷切線條生成器 (開源免費/本地運算)</title>
+  
+  <!-- Colorful Vector Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><linearGradient id=%22g%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22><stop offset=%220%25%22 stop-color=%22%238b5cf6%22/><stop offset=%22100%25%22 stop-color=%22%2306b6d4%22/></linearGradient><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22none%22 stroke=%22url(%23g)%22 stroke-width=%2212%22/><path d=%22M30 50 L70 50 M50 30 L50 70%22 stroke=%22%238b5cf6%22 stroke-width=%2210%22 stroke-linecap=%22round%22/></svg>">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="/src/style.css">
+  
+  <!-- OpenCV.js Wasm Runtime Initialization Configuration -->
+  <script>
+    // Emscripten runtime config
+    var Module = {
+      onRuntimeInitialized: function() {
+        console.log("OpenCV.js runtime initialized.");
+        window.opencvReady = true;
+        document.dispatchEvent(new Event('opencv-ready'));
+      }
+    };
+  </script>
+  <!-- Load OpenCV.js 4.13 asynchronously (upgraded from 4.10 for WASM SIMD performance boost) -->
+  <script src="https://cdn.jsdelivr.net/npm/@opencvjs/web@4.13.0-release.1/dist/opencv.js" async type="text/javascript" id="opencv-js"></script>
+</head>
+<body>
+
+  <!-- Loading Screen for OpenCV.js compilation -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loader-container">
+      <div class="glow-ring"></div>
+      <div class="loader-spinner"></div>
+      <h2>VectorLine</h2>
+      <p id="loading-text">正在載入 OpenCV.js 影像處理引擎...</p>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <h1>VectorLine</h1>
+        <span class="badge">MVP 網頁版</span>
+      </div>
+      <p class="subtitle">完全開源、免費、瀏覽器本地運算，一鍵將圖片轉換為雷雕/雷切專用 SVG 線條路徑</p>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+      <!-- Left Column: Controls & Settings -->
+      <section class="controls-panel card">
+        <h2 class="section-title">工具設定</h2>
+        
+        <!-- Step 1: Upload Image -->
+        <div class="control-group">
+          <label class="group-label">1. 上傳圖案</label>
+          <div id="drop-zone" class="drop-zone">
+            <input type="file" id="file-input" accept="image/*" class="file-input">
+            <div class="drop-zone-content">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+              <p class="primary-text">拖曳圖案至此或<span>點擊瀏覽</span></p>
+              <p class="secondary-text">支援 PNG, JPG, WebP 格式</p>
+            </div>
+            <div id="upload-preview-container" class="upload-preview-container hidden">
+              <img id="upload-preview" alt="上傳的圖片">
+              <button id="btn-remove-image" class="btn-remove" title="移除圖片">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Line Detection Options (Disabled by default, enabled when image is loaded) -->
+        <div id="settings-group" class="disabled-controls">
+          
+          <!-- Presets and Reset -->
+          <div class="preset-buttons-group">
+            <button id="btn-preset-photo" class="btn-preset">手繪相片最佳化</button>
+            <button id="btn-preset-digital" class="btn-preset">電子圖檔最佳化</button>
+            <button id="btn-reset-defaults" class="btn-reset" title="重設為預設值">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+                <path d="M23 4v6h-6M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Image Preprocessing -->
+          <div class="control-group">
+            <label class="group-label">2. 影像預處理（去斑去噪）</label>
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>雙邊濾波強度 (Denoise)</span>
+                <span id="val-denoise" class="slider-val">5</span>
+              </div>
+              <input type="range" id="slider-denoise" min="0" max="15" step="1" value="5">
+              <p class="control-desc">去除背景雜訊與紙張紋理，保留主線條邊緣。</p>
+            </div>
+            
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>影像亮度 (Brightness)</span>
+                <span id="val-brightness" class="slider-val">0</span>
+              </div>
+              <input type="range" id="slider-brightness" min="-100" max="100" step="5" value="0">
+              <p class="control-desc">調高亮度有助於去除陰影雜點，調低可增強灰暗線條。</p>
+            </div>
+
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>影像對比 (Contrast)</span>
+                <span id="val-contrast" class="slider-val">0</span>
+              </div>
+              <input type="range" id="slider-contrast" min="-100" max="100" step="5" value="0">
+              <p class="control-desc">增強線條與背景對比，有助於分離模糊的手繪線條。</p>
+            </div>
+          </div>
+
+          <!-- Binarization Params -->
+          <div class="control-group">
+            <label class="group-label">3. 二值化線條調整</label>
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>線條細緻度 (Block Size)</span>
+                <span id="val-blocksize" class="slider-val">11</span>
+              </div>
+              <input type="range" id="slider-blocksize" min="3" max="51" step="2" value="11">
+              <p class="control-desc">適應周圍亮度的局部區域大小。越小線條越細，越大線條越粗。</p>
+            </div>
+            
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>臨界分界偏置 (C Constant)</span>
+                <span id="val-c-constant" class="slider-val">2</span>
+              </div>
+              <input type="range" id="slider-c-constant" min="-10" max="15" step="1" value="2">
+              <p class="control-desc">微調線條粗細與背景干擾。越大線條越細，越小線條越粗。</p>
+            </div>
+
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>形態學去雜點 (Morphology Clean)</span>
+                <span id="val-morph-clean" class="slider-val">0</span>
+              </div>
+              <input type="range" id="slider-morph-clean" min="0" max="5" step="1" value="0">
+              <p class="control-desc">使用開運算去除細小噪點，再用閉運算填補線條斷裂。0 = 關閉。</p>
+            </div>
+            
+            <div class="slider-wrapper" style="margin-top: 14px;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="checkbox-invert-binary">
+                <span>反轉黑白顏色 (Invert Colors)</span>
+              </label>
+              <p class="control-desc" style="margin-top: 4px;">適用於黑底白字/深色背景圖片。勾選可對調影像黑白提取邏輯。</p>
+            </div>
+          </div>
+
+          <!-- Vector Simplification -->
+          <div class="control-group">
+            <label class="group-label">4. 向量與路徑優化</label>
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>節點簡化程度 (Simplify)</span>
+                <span id="val-simplify" class="slider-val">1.0%</span>
+              </div>
+              <input type="range" id="slider-simplify" min="0.1" max="5.0" step="0.1" value="1.0">
+              <p class="control-desc">數值越大節點越少、線條越平滑，能避免雷切機抖動卡頓。</p>
+            </div>
+
+            <div class="slider-wrapper">
+              <div class="slider-header">
+                <span>過濾雜點面積 (Min Area)</span>
+                <span id="val-min-area" class="slider-val">15 px</span>
+              </div>
+              <input type="range" id="slider-min-area" min="0" max="100" step="5" value="15">
+              <p class="control-desc">過濾小於此面積的孤立雜點，使切割路徑更乾淨。</p>
+            </div>
+          </div>
+
+          <!-- Step 5: Cut Mode Selector -->
+          <div class="control-group">
+            <label class="group-label">5. 雷切切割模式</label>
+            <div class="mode-selector">
+              <label class="mode-option">
+                <input type="radio" name="cut-mode" value="outline" checked>
+                <span class="mode-box">
+                  <span class="mode-title">輪廓模式 (Outline)</span>
+                  <span class="mode-desc">追蹤線條外框邊緣，適合實心色塊與向量雕刻。</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="cut-mode" value="centerline">
+                <span class="mode-box">
+                  <span class="mode-title">單線模式 (Centerline)</span>
+                  <span class="mode-desc">將線條收縮細線化為 1px 中心骨架路徑，雷射僅沿中線切割一次。</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="cut-mode" value="canny">
+                <span class="mode-box">
+                  <span class="mode-title">邊緣偵測模式 (Canny Edge)</span>
+                  <span class="mode-desc">使用 Canny 演算法精準偵測邊緣，適合從照片中提取乾淨的素描線條畫。</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Color Customization -->
+          <div class="control-group">
+            <label class="group-label">6. 匯出路徑顏色</label>
+            <div class="color-options">
+              <label class="color-radio">
+                <input type="radio" name="svg-color" value="#ff0000" checked>
+                <span class="color-dot red"></span>
+                <span>紅色 (預設切割)</span>
+              </label>
+              <label class="color-radio">
+                <input type="radio" name="svg-color" value="#000000">
+                <span class="color-dot black"></span>
+                <span>黑色</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Step 7: Laser Cutting Physical Size Scaler (mm) -->
+          <div class="control-group">
+            <label class="group-label">7. 設定輸出實體尺寸 (雷切專用)</label>
+            <div class="size-scaler-container">
+              <label class="checkbox-label">
+                <input type="checkbox" id="checkbox-enable-size" checked>
+                <span>啟用實體尺寸標記 (毫米/mm)</span>
+              </label>
+              
+              <div id="size-inputs-wrapper" class="size-inputs-wrapper">
+                <div class="size-input-field">
+                  <span class="input-label">寬度 (Width)</span>
+                  <div class="input-with-unit">
+                    <input type="number" id="input-phys-width" min="1" max="2000" value="150">
+                    <span class="unit-label">mm</span>
+                  </div>
+                </div>
+                <div class="size-input-field">
+                  <span class="input-label">高度 (Height)</span>
+                  <div class="input-with-unit readonly-field">
+                    <input type="text" id="input-phys-height" readonly value="-">
+                    <span class="unit-label">mm</span>
+                  </div>
+                </div>
+              </div>
+              <p class="control-desc size-help-desc">啟用後，匯出的 SVG 將帶有毫米物理尺寸，匯入 Beam Studio 等軟體時無需手動調整比例。</p>
+            </div>
+          </div>
+
+          <!-- Export Actions -->
+          <div class="action-buttons">
+            <button id="btn-download-svg" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+              下載 SVG 向量檔
+            </button>
+            <button id="btn-download-png" class="btn btn-secondary">
+              下載 PNG 線條圖
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Previews -->
+      <section class="preview-panel card">
+        <!-- Tabs -->
+        <div class="tabs-header">
+          <button id="tab-binary" class="tab-btn active">1. 處理後黑白線條</button>
+          <button id="tab-svg" class="tab-btn">2. 向量 SVG 預覽</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Canvas Preview -->
+          <div id="content-binary" class="preview-box">
+            <div class="canvas-container">
+              <canvas id="output-canvas"></canvas>
+              <div id="empty-state-canvas" class="empty-state">
+                <p>尚未上傳圖片。請在左側上傳以開始。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG Vector Preview -->
+          <div id="content-svg" class="preview-box hidden">
+            <div class="svg-container">
+              <div id="svg-preview-wrapper">
+                <img id="svg-preview" class="hidden" alt="SVG 向量預覽">
+              </div>
+              <div id="svg-zoom-indicator" class="zoom-indicator hidden">
+                <span>🖱️ 滾輪縮放 / 拖曳平移 | 雙擊重設</span>
+              </div>
+              <div id="empty-state-svg" class="empty-state">
+                <p>尚未上傳圖片。請在左側上傳以開始。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Board (Stats) -->
+        <div class="stats-panel">
+          <div class="stat-item">
+            <span class="stat-label">圖片尺寸</span>
+            <span id="stat-resolution" class="stat-value">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">偵測到路徑數</span>
+            <span id="stat-contours" class="stat-value">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">SVG 節點數</span>
+            <span id="stat-nodes" class="stat-value">-</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>VectorLine • 台灣創客教育輔助工具 • 採用 OpenCV.js 本地影像運算技術 • 完全免費且不收集任何資料</p>
+    </footer>
+  </div>
+
+  <!-- Main JavaScript App -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

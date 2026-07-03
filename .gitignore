@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test files
+test_input.png
+test_binary.png
+test_output.svg
+
+# Python scratch scripts (development only)
+scratch_poc.py
+scratch_search_pypdf.py
+pypdf_sample.txt
+
+# Reference PDF (too large, not needed for web app)
+*.pdf
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*

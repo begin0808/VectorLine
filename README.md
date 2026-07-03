@@ -1,14 +1,14 @@
-# VectorLine
+# VectorLine — Image-to-SVG Line Art for Laser Cutting & Engraving
 
-> Turn any image into clean, laser-ready SVG line paths — 100% in your browser.
+[English Version](README.md) | [繁體中文](README.zh-TW.md)
 
-**VectorLine** is a free, open-source web app that converts photos and digital images into vector line art for **laser cutting and engraving**. All processing runs locally in your browser using [OpenCV.js](https://docs.opencv.org/) (WebAssembly) — no uploads, no server, no data collection.
+👉 **Live Demo:** [https://vector-line.vercel.app](https://vector-line.vercel.app)
 
-🌐 **Live demo:** [vector-line.vercel.app](https://vector-line.vercel.app)
-
-繁體中文版說明請見 [README.zh-TW.md](README.zh-TW.md)。
+![License](https://img.shields.io/badge/License-MIT-blue) ![Platform](https://img.shields.io/badge/Platform-Browser-brightgreen) ![Engine](https://img.shields.io/badge/Engine-OpenCV.js%20(WASM)-red) ![Output](https://img.shields.io/badge/Output-SVG%20%2B%20PNG-blueviolet) ![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local-success)
 
 ---
+
+**VectorLine** is a free, open-source web app that converts photos and digital images into vector line art for **laser cutting and engraving**. All processing runs locally in your browser using [OpenCV.js](https://docs.opencv.org/) (WebAssembly) — no uploads, no server, no data collection.
 
 ## Features
 
@@ -18,7 +18,7 @@
 - **Adaptive binarization** — block size + C-constant thresholding that adapts to local lighting, plus optional color inversion for dark backgrounds.
 - **Morphological cleanup** — remove speckle noise and close broken lines.
 - **Three cut modes:**
-  - **Outline** — traces the outer edges of shapes (vector engraving / solid fills).
+  - **Outline** — traces every line in the image (interior detail preserved), ideal for faithful line art.
   - **Centerline** — skeletonizes strokes to a 1px path so the laser cuts each line once.
   - **Canny Edge** — extracts clean sketch-like edges from photographs.
 - **Vector optimization** — Ramer–Douglas–Peucker node simplification and small-area noise filtering for smooth, jitter-free cutting paths.

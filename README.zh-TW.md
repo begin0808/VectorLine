@@ -1,14 +1,14 @@
-# VectorLine（向量線條生成器）
+# VectorLine（向量線條生成器）— 圖片轉雷切/雷雕專用 SVG 線稿工具
 
-> 一鍵將任意圖片轉換為乾淨、可直接雷切的 SVG 線條路徑 —— 全程在瀏覽器本地完成。
+[English Version](README.md) | [繁體中文](README.zh-TW.md)
 
-**VectorLine** 是一款免費、開源的網頁工具，能將照片與數位圖檔轉換為適用於**雷射切割與雕刻**的向量線稿。所有運算皆透過 [OpenCV.js](https://docs.opencv.org/)（WebAssembly）在你的瀏覽器本地執行 —— 不上傳、無伺服器、不收集任何資料。
+👉 **線上體驗 (Live Demo)：** [https://vector-line.vercel.app](https://vector-line.vercel.app)
 
-🌐 **線上體驗：** [vector-line.vercel.app](https://vector-line.vercel.app)
-
-For the English version, see [README.md](README.md).
+![License](https://img.shields.io/badge/License-MIT-blue) ![Platform](https://img.shields.io/badge/Platform-Browser-brightgreen) ![Engine](https://img.shields.io/badge/Engine-OpenCV.js%20(WASM)-red) ![Output](https://img.shields.io/badge/Output-SVG%20%2B%20PNG-blueviolet) ![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local-success)
 
 ---
+
+**VectorLine** 是一款免費、開源的網頁工具，能將照片與數位圖檔轉換為適用於**雷射切割與雕刻**的向量線稿。所有運算皆透過 [OpenCV.js](https://docs.opencv.org/)（WebAssembly）在你的瀏覽器本地執行 —— 不上傳、無伺服器、不收集任何資料。
 
 ## 功能特色
 
@@ -18,7 +18,7 @@ For the English version, see [README.md](README.md).
 - **自適應二值化** —— 依局部亮度自動調整的區塊大小（Block Size）＋臨界偏置（C Constant）門檻，並可反轉黑白以處理深色背景。
 - **形態學清理** —— 去除細小噪點並填補斷裂線條。
 - **三種切割模式：**
-  - **輪廓模式（Outline）** —— 追蹤形狀外框邊緣，適合實心色塊與向量雕刻。
+  - **輪廓模式（Outline）** —— 描出圖中每一條線（保留內部細節），忠實還原線稿。
   - **單線模式（Centerline）** —— 將線條細線化為 1px 中心骨架，雷射僅沿中線切割一次。
   - **邊緣偵測模式（Canny Edge）** —— 從照片中精準提取乾淨的素描線條畫。
 - **向量優化** —— Ramer–Douglas–Peucker 節點簡化與小面積雜點過濾，讓切割路徑平滑、避免雷切機抖動。

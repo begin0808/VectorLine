@@ -959,13 +959,13 @@ async function loadSampleImage(url, fileName) {
 
 if (btnSample1) {
   btnSample1.addEventListener('click', () => {
-    loadSampleImage('/test_input.png', 'test_input.png');
+    loadSampleImage('/sample_sketch.png', 'sample_sketch.png');
   });
 }
 
 if (btnSample2) {
   btnSample2.addEventListener('click', () => {
-    loadSampleImage('/test_binary.png', 'test_binary.png');
+    loadSampleImage('/sample_digital.png', 'sample_digital.png');
   });
 }
 

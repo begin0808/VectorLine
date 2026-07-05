@@ -1295,6 +1295,26 @@ input[type="range"]::-moz-range-thumb:hover {
   transition: var(--transition-smooth);
 }
 
+.footer-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition-smooth);
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+  color: #4f46e5;
+}
+
+.app-container.dark-theme .footer-link {
+  color: #2dd4bf; /* Bright teal accent for dark theme footer links */
+}
+
+.app-container.dark-theme .footer-link:hover {
+  color: #0d9488;
+}
+
 /* ==========================================================================
    ONBOARDING vs ACTIVE WORKSPACE ANIMATIONS (CSS Magic)
    ========================================================================== */

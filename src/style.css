@@ -1407,3 +1407,99 @@ input[type="range"]::-moz-range-thumb:hover {
     transform: translate(-50%, -50%) scale(1);
   }
 }
+
+/* Card shrink prevention to fix height clipping in scrollable flex sidebar */
+.card {
+  flex-shrink: 0;
+}
+
+/* Pure CSS Tooltip for Info Icons */
+.label-with-tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  position: relative;
+  color: var(--text-dark);
+  opacity: 0.6;
+  transition: var(--transition-smooth);
+}
+
+.info-icon:hover {
+  opacity: 1;
+  color: var(--primary-color);
+}
+
+.info-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+/* Tooltip Box */
+.info-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 135%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: #1e293b; /* Dark background in light mode */
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.4;
+  width: 220px;
+  white-space: normal;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  text-align: left;
+}
+
+/* Dark theme tooltip adjustments */
+.app-container.dark-theme .info-icon::after {
+  background: #cbd5e1; /* Light background in dark mode */
+  color: #0f172a;
+}
+
+/* Tooltip Triangle */
+.info-icon::before {
+  content: '';
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1e293b transparent transparent transparent;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+.app-container.dark-theme .info-icon::before {
+  border-color: #cbd5e1 transparent transparent transparent;
+}
+
+/* Hover animations */
+.info-icon:hover::after,
+.info-icon:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) scale(1);
+}

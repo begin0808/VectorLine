@@ -170,37 +170,53 @@
               <div id="tab-filters" class="settings-tab-content active">
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>雙邊濾波強度 (Denoise)</span>
+                    <span class="label-with-tooltip">
+                      雙邊濾波強度 (Denoise)
+                      <span class="info-icon" data-tooltip="去除背景雜訊與紙張紋理，保留主線條邊緣。建議手繪相片設為 5~8，電子圖檔設為 0。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-denoise" class="slider-val">5</span>
                   </div>
                   <input type="range" id="slider-denoise" min="0" max="15" step="1" value="5">
-                  <p class="control-desc">去除背景雜訊與紙張紋理，保留主線條邊緣。</p>
                 </div>
                 
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>影像亮度 (Brightness)</span>
+                    <span class="label-with-tooltip">
+                      影像亮度 (Brightness)
+                      <span class="info-icon" data-tooltip="調高亮度有助於去除陰影、紙張摺痕與背光產生的灰暗雜點；調低可增強灰暗或過淡的線條。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-brightness" class="slider-val">0</span>
                   </div>
                   <input type="range" id="slider-brightness" min="-100" max="100" step="5" value="0">
-                  <p class="control-desc">調高亮度有助於去除陰影雜點，調低可增強灰暗線條。</p>
                 </div>
 
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>影像對比 (Contrast)</span>
+                    <span class="label-with-tooltip">
+                      影像對比 (Contrast)
+                      <span class="info-icon" data-tooltip="增強線條與背景對比度，拉大黑白分界，有助於分離模糊的手繪鉛筆線條。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-contrast" class="slider-val">0</span>
                   </div>
                   <input type="range" id="slider-contrast" min="-100" max="100" step="5" value="0">
-                  <p class="control-desc">增強線條與背景對比，有助於分離模糊的手繪線條。</p>
                 </div>
                 
                 <div class="checkbox-wrapper">
                   <label class="checkbox-label">
                     <input type="checkbox" id="checkbox-invert-binary">
-                    <span>反轉黑白顏色 (Invert Colors)</span>
+                    <span class="label-with-tooltip">
+                      反轉黑白顏色 (Invert Colors)
+                      <span class="info-icon" data-tooltip="適用於黑底白字或深色背景圖片。勾選可對調影像的黑白提取邏輯。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                   </label>
-                  <p class="control-desc">適用於黑底白字圖片，勾選可對調提取邏輯。</p>
                 </div>
               </div>
 
@@ -208,36 +224,53 @@
               <div id="tab-binarize" class="settings-tab-content">
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>線條細緻度 (Block Size)</span>
+                    <span class="label-with-tooltip">
+                      線條細緻度 (Block Size)
+                      <span class="info-icon" data-tooltip="自適應二值化的局部區域大小。數值越小線條越細，越大線條越粗（適用於實心色塊）。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-blocksize" class="slider-val">11</span>
                   </div>
                   <input type="range" id="slider-blocksize" min="3" max="51" step="2" value="11">
-                  <p class="control-desc">適應周圍亮度的區域大小。越小線條越細，越大線條越粗。</p>
                 </div>
                 
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>臨界分界偏置 (C Constant)</span>
+                    <span class="label-with-tooltip">
+                      臨界分界偏置 (C Constant)
+                      <span class="info-icon" data-tooltip="微調線條粗細與周圍背景干擾。數值越大線條越細、雜訊越少；數值越小線條越粗、細節越多。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-c-constant" class="slider-val">2</span>
                   </div>
                   <input type="range" id="slider-c-constant" min="-10" max="15" step="1" value="2">
-                  <p class="control-desc">微調線條量。越大線條越細，越小線條越粗。</p>
                 </div>
 
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>形態學去雜點 (Morphology Clean)</span>
+                    <span class="label-with-tooltip">
+                      形態學去雜點 (Morphology)
+                      <span class="info-icon" data-tooltip="透過膨脹/侵蝕運算去除細小椒鹽噪點，並填補主線條間的微小斷裂。0 表示關閉。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-morph-clean" class="slider-val">0</span>
                   </div>
                   <input type="range" id="slider-morph-clean" min="0" max="5" step="1" value="0">
-                  <p class="control-desc">使用形態學運算去除噪點與填補斷裂。0 = 關閉。</p>
                 </div>
               </div>
 
               <!-- Tab 3: Vector Optimization -->
               <div id="tab-vector" class="settings-tab-content">
                 <div class="control-subgroup">
-                  <span class="subgroup-label">雷切切割模式 (Cut Mode)</span>
+                  <span class="subgroup-label label-with-tooltip">
+                    雷切切割模式 (Cut Mode)
+                    <span class="info-icon" data-tooltip="【輪廓模式】追蹤邊緣雙描邊，適合實心色塊雕刻；【單線模式】將線條細線化並追蹤為單一中心線，適合雷射沿中線切割（省時）；【邊緣模式】Canny 演算，適合照片提取。">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </span>
+                  </span>
                   <div class="segmented-control mode-3-cols">
                     <label class="segment-tab">
                       <input type="radio" name="cut-mode" value="outline" checked>
@@ -256,35 +289,52 @@
 
                 <div class="slider-wrapper" style="margin-top: 8px;">
                   <div class="slider-header">
-                    <span>節點簡化程度 (Simplify)</span>
+                    <span class="label-with-tooltip">
+                      節點簡化程度 (Simplify)
+                      <span class="info-icon" data-tooltip="路徑節點簡化容差。數值越大產出的 SVG 節點越少、檔案越小，但細節越少；0 為忠實還原。超小圖片建議設為 0.1~0.3。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-simplify" class="slider-val">1.0 px</span>
                   </div>
                   <input type="range" id="slider-simplify" min="0" max="5.0" step="0.1" value="1.0">
-                  <p class="control-desc">容差越大節點越少，更利於雷雕；0 為不簡化。</p>
                 </div>
 
                 <div class="slider-wrapper">
                   <div class="slider-header">
-                    <span>過濾雜點面積 (Min Area)</span>
+                    <span class="label-with-tooltip">
+                      過濾雜點面積 (Min Area)
+                      <span class="info-icon" data-tooltip="過濾掉小於此面積的孤立雜訊碎塊。數值越大越乾淨，但微小細節會消失。超小圖片建議設為 0~5。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                     <span id="val-min-area" class="slider-val">15 px</span>
                   </div>
                   <input type="range" id="slider-min-area" min="0" max="500" step="5" value="15">
-                  <p class="control-desc">過濾小碎塊，大幅減少冗餘雷切路徑。</p>
                 </div>
 
                 <div class="checkbox-wrapper">
                   <label class="checkbox-label">
                     <input type="checkbox" id="checkbox-smooth">
-                    <span>曲線平滑 (Smooth Curves)</span>
+                    <span class="label-with-tooltip">
+                      曲線平滑 (Smooth Curves)
+                      <span class="info-icon" data-tooltip="將折線節點轉為貝茲曲線，使線條極為平順，雷切切割時機器更不易產生抖動。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                   </label>
-                  <p class="control-desc">將折線轉為平滑貝茲曲線，雷切機運動更流暢。</p>
                 </div>
               </div>
 
               <!-- Tab 4: Export Configuration -->
               <div id="tab-export" class="settings-tab-content">
                 <div class="control-subgroup">
-                  <span class="subgroup-label">匯出樣式 (Render Mode)</span>
+                  <span class="subgroup-label label-with-tooltip">
+                    匯出樣式 (Render Mode)
+                    <span class="info-icon" data-tooltip="【描邊】僅繪製線條路徑（細線），用於雷射切割；【填色】填充路徑閉合區塊，外觀接近黑白圖，用於雷射雕刻。">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </span>
+                  </span>
                   <div class="segmented-control mode-2-cols">
                     <label class="segment-tab">
                       <input type="radio" name="render-mode" value="stroke" checked>
@@ -298,7 +348,12 @@
                 </div>
                 
                 <div class="control-subgroup">
-                  <span class="subgroup-label">匯出顏色 (Color)</span>
+                  <span class="subgroup-label label-with-tooltip">
+                    匯出顏色 (Color)
+                    <span class="info-icon" data-tooltip="SVG 路徑顏色。雷切機通常識別紅色作為「切割」路徑。">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </span>
+                  </span>
                   <div class="segmented-control mode-2-cols">
                     <label class="segment-tab">
                       <input type="radio" name="svg-color" value="#ff0000" checked>
@@ -314,7 +369,12 @@
                 <div class="size-scaler-container" style="margin-top: 8px;">
                   <label class="checkbox-label">
                     <input type="checkbox" id="checkbox-enable-size" checked>
-                    <span>啟用實體尺寸標記 (毫米/mm)</span>
+                    <span class="label-with-tooltip">
+                      啟用實體尺寸標記 (毫米/mm)
+                      <span class="info-icon" data-tooltip="勾選後，匯出的 SVG 將帶有毫米物理尺寸（以等比例縮放），匯入 Beam Studio 等軟體時不需手動重新縮放比例。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
                   </label>
                   
                   <div id="size-inputs-wrapper" class="size-inputs-wrapper">
@@ -333,7 +393,6 @@
                       </div>
                     </div>
                   </div>
-                  <p class="control-desc size-help-desc">啟用後帶有毫米物理尺寸，雷雕軟體免手動縮放。</p>
                 </div>
               </div>
             </div>

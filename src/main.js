@@ -195,6 +195,13 @@ function handleImageFile(file) {
       emptyStateCanvas.classList.add('hidden');
       emptyStateSvg.classList.add('hidden');
       
+      // Switch layout to active workspace
+      const appContainer = document.querySelector('.app-container');
+      if (appContainer) {
+        appContainer.classList.remove('is-empty');
+        appContainer.classList.add('is-loaded');
+      }
+      
       // Calculate physical height
       updatePhysicalHeight();
       
@@ -218,6 +225,13 @@ function resetImage() {
   // Disable controls panel
   settingsGroup.classList.remove('enabled-controls');
   settingsGroup.classList.add('disabled-controls');
+  
+  // Switch layout to onboarding state
+  const appContainer = document.querySelector('.app-container');
+  if (appContainer) {
+    appContainer.classList.add('is-empty');
+    appContainer.classList.remove('is-loaded');
+  }
   
   // Restore empty states
   emptyStateCanvas.classList.remove('hidden');
@@ -887,6 +901,92 @@ function processImage() {
     if (hierarchy) hierarchy.delete();
   }
 }
+
+// Theme Toggle Logic
+const btnThemeToggle = document.getElementById('btn-theme-toggle');
+if (btnThemeToggle) {
+  const appContainer = document.querySelector('.app-container');
+  const sunIcon = document.querySelector('.sun-icon');
+  const moonIcon = document.querySelector('.moon-icon');
+  
+  // Default to dark mode
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'dark') {
+    appContainer.classList.add('dark-theme');
+    sunIcon.classList.remove('hidden');
+    moonIcon.classList.add('hidden');
+  } else {
+    appContainer.classList.remove('dark-theme');
+    sunIcon.classList.add('hidden');
+    moonIcon.classList.remove('hidden');
+  }
+
+  btnThemeToggle.addEventListener('click', () => {
+    if (appContainer.classList.contains('dark-theme')) {
+      appContainer.classList.remove('dark-theme');
+      sunIcon.classList.add('hidden');
+      moonIcon.classList.remove('hidden');
+      localStorage.setItem('theme', 'light');
+    } else {
+      appContainer.classList.add('dark-theme');
+      sunIcon.classList.remove('hidden');
+      moonIcon.classList.add('hidden');
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+}
+
+// Onboarding Sample Images click events
+const btnSample1 = document.getElementById('btn-sample-1');
+const btnSample2 = document.getElementById('btn-sample-2');
+
+async function loadSampleImage(url, fileName) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network response was not ok");
+    const blob = await response.blob();
+    const file = new File([blob], fileName, { type: blob.type });
+    handleImageFile(file);
+  } catch (error) {
+    console.error('載入樣品圖片失敗:', error);
+    alert('載入樣品圖片失敗，請嘗試手動上傳。');
+  }
+}
+
+if (btnSample1) {
+  btnSample1.addEventListener('click', () => {
+    loadSampleImage('/test_input.png', 'test_input.png');
+  });
+}
+
+if (btnSample2) {
+  btnSample2.addEventListener('click', () => {
+    loadSampleImage('/test_binary.png', 'test_binary.png');
+  });
+}
+
+// Settings card tabs switching logic
+const tabTriggers = document.querySelectorAll('.tab-trigger');
+const tabContents = document.querySelectorAll('.settings-tab-content');
+
+tabTriggers.forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const targetTabId = trigger.getAttribute('data-tab');
+    
+    // Deactivate all triggers and activate current
+    tabTriggers.forEach(t => t.classList.remove('active'));
+    trigger.classList.add('active');
+    
+    // Hide all tab contents and show current
+    tabContents.forEach(content => {
+      if (content.id === targetTabId) {
+        content.classList.add('active');
+      } else {
+        content.classList.remove('active');
+      }
+    });
+  });
+});
 
 // Start OpenCV load check
 checkOpenCVReady();

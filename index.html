@@ -46,25 +46,55 @@
     </div>
   </div>
 
-  <div class="app-container">
+  <div class="app-container is-empty">
     <!-- Header -->
     <header class="app-header">
-      <div class="logo-area">
-        <h1>VectorLine</h1>
-        <span class="badge">MVP 網頁版</span>
+      <div class="header-left">
+        <div class="logo-area">
+          <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <linearGradient id="g-logo" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#818cf8" />
+              <stop offset="100%" stop-color="#2dd4bf" />
+            </linearGradient>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="url(#g-logo)" stroke-width="12" />
+            <path d="M30 50 L70 50 M50 30 L50 70" stroke="url(#g-logo)" stroke-width="10" stroke-linecap="round" />
+          </svg>
+          <h1>VectorLine</h1>
+          <span class="badge">MVP 網頁版</span>
+        </div>
+        <p class="subtitle">完全開源、免費、瀏覽器本地運算，一鍵將圖片轉換為雷雕/雷切專用 SVG 線條路徑</p>
       </div>
-      <p class="subtitle">完全開源、免費、瀏覽器本地運算，一鍵將圖片轉換為雷雕/雷切專用 SVG 線條路徑</p>
+      <div class="header-right">
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="切換深淺色模式">
+          <!-- Sun icon -->
+          <svg class="sun-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon icon -->
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
     </header>
 
     <!-- Main Workspace -->
     <main class="app-main">
-      <!-- Left Column: Controls & Settings -->
-      <section class="controls-panel card">
-        <h2 class="section-title">工具設定</h2>
+      <!-- Sidebar Panel: Controls & Settings -->
+      <aside class="app-sidebar">
         
-        <!-- Step 1: Upload Image -->
-        <div class="control-group">
-          <label class="group-label">1. 上傳圖案</label>
+        <!-- Step 1: Upload Section -->
+        <div class="upload-section card">
+          <div class="group-label">1. 上傳與試用</div>
+          
           <div id="drop-zone" class="drop-zone">
             <input type="file" id="file-input" accept="image/*" class="file-input">
             <div class="drop-zone-content">
@@ -74,6 +104,7 @@
               <p class="primary-text">拖曳圖案至此或<span>點擊瀏覽</span></p>
               <p class="secondary-text">支援 PNG, JPG, WebP 格式</p>
             </div>
+            
             <div id="upload-preview-container" class="upload-preview-container hidden">
               <img id="upload-preview" alt="上傳的圖片">
               <button id="btn-remove-image" class="btn-remove" title="移除圖片">
@@ -84,274 +115,316 @@
               </button>
             </div>
           </div>
+
+          <!-- Sample Images (only shown in onboarding/empty state) -->
+          <div class="onboarding-samples">
+            <p class="samples-title">無可用檔案？點擊快速試用樣品：</p>
+            <div class="samples-grid">
+              <button class="sample-card" id="btn-sample-1" type="button">
+                <div class="sample-icon">✍️</div>
+                <div class="sample-info">
+                  <span class="sample-name">手繪線稿</span>
+                  <span class="sample-desc">測試雙邊去噪與對比度</span>
+                </div>
+              </button>
+              <button class="sample-card" id="btn-sample-2" type="button">
+                <div class="sample-icon">🤖</div>
+                <div class="sample-info">
+                  <span class="sample-name">電子線條</span>
+                  <span class="sample-desc">測試乾淨的二值提取</span>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Step 2: Line Detection Options (Disabled by default, enabled when image is loaded) -->
-        <div id="settings-group" class="disabled-controls">
+        <!-- Controls panel (disabled when no image is uploaded) -->
+        <div id="settings-group" class="disabled-controls settings-scroller">
           
           <!-- Presets and Reset -->
-          <div class="preset-buttons-group">
-            <button id="btn-preset-photo" class="btn-preset">手繪相片最佳化</button>
-            <button id="btn-preset-digital" class="btn-preset">電子圖檔最佳化</button>
-            <button id="btn-reset-defaults" class="btn-reset" title="重設為預設值">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
-                <path d="M23 4v6h-6M1 20v-6h6"/>
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-              </svg>
-            </button>
+          <div class="settings-card card">
+            <div class="card-header-static">快速參數預設</div>
+            <div class="preset-buttons-group">
+              <button id="btn-preset-photo" class="btn-preset">手繪相片最佳化</button>
+              <button id="btn-preset-digital" class="btn-preset">電子圖檔最佳化</button>
+              <button id="btn-reset-defaults" class="btn-reset" title="重設為預設值">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+                  <path d="M23 4v6h-6M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+              </button>
+            </div>
           </div>
           
-          <!-- Image Preprocessing -->
-          <div class="control-group">
-            <label class="group-label">2. 影像預處理（去斑去噪）</label>
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>雙邊濾波強度 (Denoise)</span>
-                <span id="val-denoise" class="slider-val">5</span>
-              </div>
-              <input type="range" id="slider-denoise" min="0" max="15" step="1" value="5">
-              <p class="control-desc">去除背景雜訊與紙張紋理，保留主線條邊緣。</p>
+          <!-- Main Settings Card with Tabs -->
+          <div class="settings-card-tabs card">
+            <div class="settings-tabs-bar">
+              <button type="button" class="tab-trigger active" data-tab="tab-filters">濾波預處理</button>
+              <button type="button" class="tab-trigger" data-tab="tab-binarize">二值化</button>
+              <button type="button" class="tab-trigger" data-tab="tab-vector">向量優化</button>
+              <button type="button" class="tab-trigger" data-tab="tab-export">輸出規格</button>
             </div>
             
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>影像亮度 (Brightness)</span>
-                <span id="val-brightness" class="slider-val">0</span>
-              </div>
-              <input type="range" id="slider-brightness" min="-100" max="100" step="5" value="0">
-              <p class="control-desc">調高亮度有助於去除陰影雜點，調低可增強灰暗線條。</p>
-            </div>
-
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>影像對比 (Contrast)</span>
-                <span id="val-contrast" class="slider-val">0</span>
-              </div>
-              <input type="range" id="slider-contrast" min="-100" max="100" step="5" value="0">
-              <p class="control-desc">增強線條與背景對比，有助於分離模糊的手繪線條。</p>
-            </div>
-          </div>
-
-          <!-- Binarization Params -->
-          <div class="control-group">
-            <label class="group-label">3. 二值化線條調整</label>
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>線條細緻度 (Block Size)</span>
-                <span id="val-blocksize" class="slider-val">11</span>
-              </div>
-              <input type="range" id="slider-blocksize" min="3" max="51" step="2" value="11">
-              <p class="control-desc">適應周圍亮度的局部區域大小。越小線條越細，越大線條越粗。</p>
-            </div>
-            
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>臨界分界偏置 (C Constant)</span>
-                <span id="val-c-constant" class="slider-val">2</span>
-              </div>
-              <input type="range" id="slider-c-constant" min="-10" max="15" step="1" value="2">
-              <p class="control-desc">微調線條粗細與背景干擾。越大線條越細，越小線條越粗。</p>
-            </div>
-
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>形態學去雜點 (Morphology Clean)</span>
-                <span id="val-morph-clean" class="slider-val">0</span>
-              </div>
-              <input type="range" id="slider-morph-clean" min="0" max="5" step="1" value="0">
-              <p class="control-desc">使用開運算去除細小噪點，再用閉運算填補線條斷裂。0 = 關閉。</p>
-            </div>
-            
-            <div class="slider-wrapper" style="margin-top: 14px;">
-              <label class="checkbox-label">
-                <input type="checkbox" id="checkbox-invert-binary">
-                <span>反轉黑白顏色 (Invert Colors)</span>
-              </label>
-              <p class="control-desc" style="margin-top: 4px;">適用於黑底白字/深色背景圖片。勾選可對調影像黑白提取邏輯。</p>
-            </div>
-          </div>
-
-          <!-- Vector Simplification -->
-          <div class="control-group">
-            <label class="group-label">4. 向量與路徑優化</label>
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>節點簡化程度 (Simplify)</span>
-                <span id="val-simplify" class="slider-val">1.0 px</span>
-              </div>
-              <input type="range" id="slider-simplify" min="0" max="5.0" step="0.1" value="1.0">
-              <p class="control-desc">以像素為單位的容差：數值越大節點越少、線條越平滑；0 = 不簡化（最忠實還原黑白圖，但檔案較大）。</p>
-            </div>
-
-            <div class="slider-wrapper">
-              <div class="slider-header">
-                <span>過濾雜點面積 (Min Area)</span>
-                <span id="val-min-area" class="slider-val">15 px</span>
-              </div>
-              <input type="range" id="slider-min-area" min="0" max="500" step="5" value="15">
-              <p class="control-desc">過濾小於此面積的孤立雜點與碎塊。調高可清除紋理雜訊（如格子衣物），大幅減少路徑數。（單線模式下改以線長過濾）</p>
-            </div>
-
-            <div class="slider-wrapper" style="margin-top: 14px;">
-              <label class="checkbox-label">
-                <input type="checkbox" id="checkbox-smooth">
-                <span>曲線平滑 (Smooth Curves)</span>
-              </label>
-              <p class="control-desc" style="margin-top: 4px;">將折線節點轉為平滑貝茲曲線，線條更順、雷切機更不易抖動。轉角較多的圖案效果最明顯。</p>
-            </div>
-          </div>
-
-          <!-- Step 5: Cut Mode Selector -->
-          <div class="control-group">
-            <label class="group-label">5. 雷切切割模式</label>
-            <div class="mode-selector">
-              <label class="mode-option">
-                <input type="radio" name="cut-mode" value="outline" checked>
-                <span class="mode-box">
-                  <span class="mode-title">輪廓模式 (Outline)</span>
-                  <span class="mode-desc">追蹤線條外框邊緣，適合實心色塊與向量雕刻。</span>
-                </span>
-              </label>
-              <label class="mode-option">
-                <input type="radio" name="cut-mode" value="centerline">
-                <span class="mode-box">
-                  <span class="mode-title">單線模式 (Centerline)</span>
-                  <span class="mode-desc">將線條細線化並追蹤為單一中心線（非雙描邊），雷射沿線只切一次，最省時、最適合線稿切割。</span>
-                </span>
-              </label>
-              <label class="mode-option">
-                <input type="radio" name="cut-mode" value="canny">
-                <span class="mode-box">
-                  <span class="mode-title">邊緣偵測模式 (Canny Edge)</span>
-                  <span class="mode-desc">使用 Canny 演算法精準偵測邊緣，適合從照片中提取乾淨的素描線條畫。</span>
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Render Style + Color -->
-          <div class="control-group">
-            <label class="group-label">6. 匯出樣式與顏色</label>
-
-            <div class="mode-selector" style="margin-bottom: 14px;">
-              <label class="mode-option">
-                <input type="radio" name="render-mode" value="stroke" checked>
-                <span class="mode-box">
-                  <span class="mode-title">描邊模式 (Stroke)</span>
-                  <span class="mode-desc">只描線條輪廓（細髮線），適合雷射切割沿線切。</span>
-                </span>
-              </label>
-              <label class="mode-option">
-                <input type="radio" name="render-mode" value="fill">
-                <span class="mode-box">
-                  <span class="mode-title">填色模式 (Fill)</span>
-                  <span class="mode-desc">實心區塊填滿顏色，外觀最接近黑白圖，適合雷射雕刻/上色。</span>
-                </span>
-              </label>
-            </div>
-
-            <div class="color-options">
-              <label class="color-radio">
-                <input type="radio" name="svg-color" value="#ff0000" checked>
-                <span class="color-dot red"></span>
-                <span>紅色 (預設切割)</span>
-              </label>
-              <label class="color-radio">
-                <input type="radio" name="svg-color" value="#000000">
-                <span class="color-dot black"></span>
-                <span>黑色</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Step 7: Laser Cutting Physical Size Scaler (mm) -->
-          <div class="control-group">
-            <label class="group-label">7. 設定輸出實體尺寸 (雷切專用)</label>
-            <div class="size-scaler-container">
-              <label class="checkbox-label">
-                <input type="checkbox" id="checkbox-enable-size" checked>
-                <span>啟用實體尺寸標記 (毫米/mm)</span>
-              </label>
-              
-              <div id="size-inputs-wrapper" class="size-inputs-wrapper">
-                <div class="size-input-field">
-                  <span class="input-label">寬度 (Width)</span>
-                  <div class="input-with-unit">
-                    <input type="number" id="input-phys-width" min="1" max="2000" value="150">
-                    <span class="unit-label">mm</span>
+            <div class="tab-contents-container">
+              <!-- Tab 1: Filters & Preprocessing -->
+              <div id="tab-filters" class="settings-tab-content active">
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>雙邊濾波強度 (Denoise)</span>
+                    <span id="val-denoise" class="slider-val">5</span>
                   </div>
+                  <input type="range" id="slider-denoise" min="0" max="15" step="1" value="5">
+                  <p class="control-desc">去除背景雜訊與紙張紋理，保留主線條邊緣。</p>
                 </div>
-                <div class="size-input-field">
-                  <span class="input-label">高度 (Height)</span>
-                  <div class="input-with-unit readonly-field">
-                    <input type="text" id="input-phys-height" readonly value="-">
-                    <span class="unit-label">mm</span>
+                
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>影像亮度 (Brightness)</span>
+                    <span id="val-brightness" class="slider-val">0</span>
                   </div>
+                  <input type="range" id="slider-brightness" min="-100" max="100" step="5" value="0">
+                  <p class="control-desc">調高亮度有助於去除陰影雜點，調低可增強灰暗線條。</p>
+                </div>
+
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>影像對比 (Contrast)</span>
+                    <span id="val-contrast" class="slider-val">0</span>
+                  </div>
+                  <input type="range" id="slider-contrast" min="-100" max="100" step="5" value="0">
+                  <p class="control-desc">增強線條與背景對比，有助於分離模糊的手繪線條。</p>
+                </div>
+                
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="checkbox-invert-binary">
+                    <span>反轉黑白顏色 (Invert Colors)</span>
+                  </label>
+                  <p class="control-desc">適用於黑底白字圖片，勾選可對調提取邏輯。</p>
                 </div>
               </div>
-              <p class="control-desc size-help-desc">啟用後，匯出的 SVG 將帶有毫米物理尺寸，匯入 Beam Studio 等軟體時無需手動調整比例。</p>
+
+              <!-- Tab 2: Binarization -->
+              <div id="tab-binarize" class="settings-tab-content">
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>線條細緻度 (Block Size)</span>
+                    <span id="val-blocksize" class="slider-val">11</span>
+                  </div>
+                  <input type="range" id="slider-blocksize" min="3" max="51" step="2" value="11">
+                  <p class="control-desc">適應周圍亮度的區域大小。越小線條越細，越大線條越粗。</p>
+                </div>
+                
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>臨界分界偏置 (C Constant)</span>
+                    <span id="val-c-constant" class="slider-val">2</span>
+                  </div>
+                  <input type="range" id="slider-c-constant" min="-10" max="15" step="1" value="2">
+                  <p class="control-desc">微調線條量。越大線條越細，越小線條越粗。</p>
+                </div>
+
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>形態學去雜點 (Morphology Clean)</span>
+                    <span id="val-morph-clean" class="slider-val">0</span>
+                  </div>
+                  <input type="range" id="slider-morph-clean" min="0" max="5" step="1" value="0">
+                  <p class="control-desc">使用形態學運算去除噪點與填補斷裂。0 = 關閉。</p>
+                </div>
+              </div>
+
+              <!-- Tab 3: Vector Optimization -->
+              <div id="tab-vector" class="settings-tab-content">
+                <div class="control-subgroup">
+                  <span class="subgroup-label">雷切切割模式 (Cut Mode)</span>
+                  <div class="segmented-control mode-3-cols">
+                    <label class="segment-tab">
+                      <input type="radio" name="cut-mode" value="outline" checked>
+                      <span class="segment-label">輪廓 (Outline)</span>
+                    </label>
+                    <label class="segment-tab">
+                      <input type="radio" name="cut-mode" value="centerline">
+                      <span class="segment-label">單線 (Centerline)</span>
+                    </label>
+                    <label class="segment-tab">
+                      <input type="radio" name="cut-mode" value="canny">
+                      <span class="segment-label">邊緣 (Canny)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="slider-wrapper" style="margin-top: 8px;">
+                  <div class="slider-header">
+                    <span>節點簡化程度 (Simplify)</span>
+                    <span id="val-simplify" class="slider-val">1.0 px</span>
+                  </div>
+                  <input type="range" id="slider-simplify" min="0" max="5.0" step="0.1" value="1.0">
+                  <p class="control-desc">容差越大節點越少，更利於雷雕；0 為不簡化。</p>
+                </div>
+
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span>過濾雜點面積 (Min Area)</span>
+                    <span id="val-min-area" class="slider-val">15 px</span>
+                  </div>
+                  <input type="range" id="slider-min-area" min="0" max="500" step="5" value="15">
+                  <p class="control-desc">過濾小碎塊，大幅減少冗餘雷切路徑。</p>
+                </div>
+
+                <div class="checkbox-wrapper">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="checkbox-smooth">
+                    <span>曲線平滑 (Smooth Curves)</span>
+                  </label>
+                  <p class="control-desc">將折線轉為平滑貝茲曲線，雷切機運動更流暢。</p>
+                </div>
+              </div>
+
+              <!-- Tab 4: Export Configuration -->
+              <div id="tab-export" class="settings-tab-content">
+                <div class="control-subgroup">
+                  <span class="subgroup-label">匯出樣式 (Render Mode)</span>
+                  <div class="segmented-control mode-2-cols">
+                    <label class="segment-tab">
+                      <input type="radio" name="render-mode" value="stroke" checked>
+                      <span class="segment-label">描邊 (Stroke)</span>
+                    </label>
+                    <label class="segment-tab">
+                      <input type="radio" name="render-mode" value="fill">
+                      <span class="segment-label">填色 (Fill)</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="control-subgroup">
+                  <span class="subgroup-label">匯出顏色 (Color)</span>
+                  <div class="segmented-control mode-2-cols">
+                    <label class="segment-tab">
+                      <input type="radio" name="svg-color" value="#ff0000" checked>
+                      <span class="segment-label color-label-red">紅色 (預設切割)</span>
+                    </label>
+                    <label class="segment-tab">
+                      <input type="radio" name="svg-color" value="#000000">
+                      <span class="segment-label color-label-black">黑色</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="size-scaler-container" style="margin-top: 8px;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="checkbox-enable-size" checked>
+                    <span>啟用實體尺寸標記 (毫米/mm)</span>
+                  </label>
+                  
+                  <div id="size-inputs-wrapper" class="size-inputs-wrapper">
+                    <div class="size-input-field">
+                      <span class="input-label">寬度 (Width)</span>
+                      <div class="input-with-unit">
+                        <input type="number" id="input-phys-width" min="1" max="2000" value="150">
+                        <span class="unit-label">mm</span>
+                      </div>
+                    </div>
+                    <div class="size-input-field">
+                      <span class="input-label">高度 (Height)</span>
+                      <div class="input-with-unit readonly-field">
+                        <input type="text" id="input-phys-height" readonly value="-">
+                        <span class="unit-label">mm</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="control-desc size-help-desc">啟用後帶有毫米物理尺寸，雷雕軟體免手動縮放。</p>
+                </div>
+              </div>
             </div>
           </div>
-
-          <!-- Export Actions -->
-          <div class="action-buttons">
-            <button id="btn-download-svg" class="btn btn-primary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-              </svg>
-              下載 SVG 向量檔
-            </button>
-            <button id="btn-download-png" class="btn btn-secondary">
-              下載 PNG 線條圖
-            </button>
-          </div>
+          
         </div>
-      </section>
 
-      <!-- Bottom Block: Previews shown side by side for easy comparison -->
-      <section class="preview-panel card">
-        <div class="preview-grid">
-          <!-- Canvas Preview -->
-          <div class="preview-pane">
-            <div class="pane-header">1. 處理後黑白線條</div>
-            <div class="canvas-container">
-              <canvas id="output-canvas"></canvas>
-              <div id="empty-state-canvas" class="empty-state">
-                <p>尚未上傳圖片。請在上方上傳以開始。</p>
-              </div>
-            </div>
+        <!-- Sticky Sidebar Download Actions -->
+        <div class="sidebar-action-buttons">
+          <button id="btn-download-svg" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+            下載 SVG 向量檔
+          </button>
+          <button id="btn-download-png" class="btn btn-secondary">
+            下載 PNG 線條圖
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Live Preview Workspace -->
+      <section class="app-workspace">
+        <!-- Floating Workspace Header -->
+        <div class="workspace-header">
+          <div class="workspace-title">
+            <svg class="workspace-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+            <h2>即時預覽工作區</h2>
           </div>
-
-          <!-- SVG Vector Preview -->
-          <div class="preview-pane">
-            <div class="pane-header">2. 向量 SVG 預覽</div>
-            <div class="svg-container">
-              <div id="svg-preview-wrapper">
-                <img id="svg-preview" class="hidden" alt="SVG 向量預覽">
-              </div>
-              <div id="svg-zoom-indicator" class="zoom-indicator hidden">
-                <span>🖱️ 滾輪縮放 / 拖曳平移 | 雙擊重設</span>
-              </div>
-              <div id="empty-state-svg" class="empty-state">
-                <p>尚未上傳圖片。請在上方上傳以開始。</p>
-              </div>
+          
+          <!-- Info Board (Stats) -->
+          <div class="stats-panel-compact">
+            <div class="stat-item">
+              <span class="stat-label">圖片尺寸</span>
+              <span id="stat-resolution" class="stat-value">-</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-label">偵測到路徑數</span>
+              <span id="stat-contours" class="stat-value">-</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-label">SVG 節點數</span>
+              <span id="stat-nodes" class="stat-value">-</span>
             </div>
           </div>
         </div>
 
-        <!-- Info Board (Stats) -->
-        <div class="stats-panel">
-          <div class="stat-item">
-            <span class="stat-label">圖片尺寸</span>
-            <span id="stat-resolution" class="stat-value">-</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">偵測到路徑數</span>
-            <span id="stat-contours" class="stat-value">-</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">SVG 節點數</span>
-            <span id="stat-nodes" class="stat-value">-</span>
+        <!-- Previews Workspace -->
+        <div class="preview-panel card">
+          <div class="preview-grid">
+            <!-- Canvas Preview -->
+            <div class="preview-pane">
+              <div class="pane-header">1. 處理後黑白線條</div>
+              <div class="canvas-container checkerboard">
+                <canvas id="output-canvas"></canvas>
+                <div id="empty-state-canvas" class="empty-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-state-icon">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  <p>工作區已就緒，請上傳圖片以開始</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- SVG Vector Preview -->
+            <div class="preview-pane">
+              <div class="pane-header">2. 向量 SVG 預覽</div>
+              <div class="svg-container checkerboard">
+                <div id="svg-preview-wrapper">
+                  <img id="svg-preview" class="hidden" alt="SVG 向量預覽">
+                </div>
+                <div id="svg-zoom-indicator" class="zoom-indicator hidden">
+                  <span>🖱️ 滾輪縮放 / 拖曳平移 | 雙擊重設</span>
+                </div>
+                <div id="empty-state-svg" class="empty-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-state-icon">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                  <p>向量路徑生成後將在此顯示</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

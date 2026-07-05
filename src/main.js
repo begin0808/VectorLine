@@ -261,6 +261,14 @@ function resetImage() {
   
   // Reset pan & zoom values
   resetZoomAndPan();
+
+  // Disable & close the before/after compare tool
+  const compareBtn = document.getElementById('btn-compare-toggle');
+  if (compareBtn) compareBtn.disabled = true;
+  const compareLayerEl = document.getElementById('compare-layer');
+  if (compareLayerEl) compareLayerEl.classList.add('hidden');
+  if (typeof compareActive !== 'undefined') compareActive = false;
+  if (compareBtn) compareBtn.classList.remove('active');
 }
 
 
@@ -468,6 +476,189 @@ btnDownloadPng.addEventListener('click', () => {
   document.body.removeChild(link);
 });
 
+// ----------------------------------------------------
+// DXF Export (SVG paths -> LWPOLYLINE entities)
+// ----------------------------------------------------
+const btnDownloadDxf = document.getElementById('btn-download-dxf');
+
+// Hidden SVG path used to sample bezier/line geometry into points
+let dxfSamplerSvg = null;
+let dxfSamplerPath = null;
+function getDxfSampler() {
+  if (!dxfSamplerSvg) {
+    const NS = 'http://www.w3.org/2000/svg';
+    dxfSamplerSvg = document.createElementNS(NS, 'svg');
+    dxfSamplerSvg.setAttribute('width', '0');
+    dxfSamplerSvg.setAttribute('height', '0');
+    dxfSamplerSvg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden;';
+    dxfSamplerPath = document.createElementNS(NS, 'path');
+    dxfSamplerSvg.appendChild(dxfSamplerPath);
+    document.body.appendChild(dxfSamplerSvg);
+  }
+  return dxfSamplerPath;
+}
+
+// Sample one sub-path 'd' string into an array of [x,y] points
+function sampleSubPath(dStr, stepPx) {
+  const p = getDxfSampler();
+  p.setAttribute('d', dStr);
+  let total = 0;
+  try { total = p.getTotalLength(); } catch (e) { return []; }
+  if (!isFinite(total) || total <= 0) {
+    const pt = p.getPointAtLength(0);
+    return [[pt.x, pt.y]];
+  }
+  const step = Math.max(0.4, stepPx);
+  const nSeg = Math.max(1, Math.ceil(total / step));
+  const pts = [];
+  for (let i = 0; i <= nSeg; i++) {
+    const pt = p.getPointAtLength((i / nSeg) * total);
+    pts.push([pt.x, pt.y]);
+  }
+  return pts;
+}
+
+function buildDxfFromSvg(svgString) {
+  const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+  const pathEls = doc.querySelectorAll('path');
+  const natW = imgElement.naturalWidth;
+  const natH = imgElement.naturalHeight;
+
+  // Determine scale to physical mm (falls back to 1:1 pixels)
+  let sx = 1, sy = 1;
+  if (checkboxEnableSize.checked) {
+    const physW = parseFloat(inputPhysWidth.value) || 0;
+    const physH = parseFloat(inputPhysHeight.value) || 0;
+    if (physW > 0 && physH > 0 && natW > 0 && natH > 0) {
+      sx = physW / natW;
+      sy = physH / natH;
+    }
+  }
+
+  const entities = [];
+  pathEls.forEach((el) => {
+    const d = el.getAttribute('d');
+    if (!d) return;
+    const stroke = (el.getAttribute('stroke') || '').toLowerCase();
+    const isCut = stroke === '#ff0000' || stroke === 'red';
+    const layer = isCut ? 'CUT' : 'ENGRAVE';
+    const aci = isCut ? 1 : 7;
+
+    // Split combined 'd' into independent sub-paths so we don't draw jumps between them
+    const subs = d.split(/(?=M)/i).map(s => s.trim()).filter(Boolean);
+    subs.forEach((sub) => {
+      const closed = /z/i.test(sub);
+      const raw = sampleSubPath(sub, 1.0);
+      if (raw.length < 2) return;
+      // Transform: scale to mm and flip Y (DXF Y is up, SVG Y is down)
+      const verts = raw.map(([x, y]) => [x * sx, (natH - y) * sy]);
+      let e = '0\nLWPOLYLINE\n100\nAcDbEntity\n8\n' + layer + '\n62\n' + aci +
+              '\n100\nAcDbPolyline\n90\n' + verts.length + '\n70\n' + (closed ? 1 : 0) + '\n';
+      for (const [x, y] of verts) {
+        e += '10\n' + x.toFixed(4) + '\n20\n' + y.toFixed(4) + '\n';
+      }
+      entities.push(e);
+    });
+  });
+
+  const header =
+    '0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1015\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n' +
+    '0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n2\n' +
+    '0\nLAYER\n2\nCUT\n70\n0\n62\n1\n6\nCONTINUOUS\n' +
+    '0\nLAYER\n2\nENGRAVE\n70\n0\n62\n7\n6\nCONTINUOUS\n' +
+    '0\nENDTAB\n0\nENDSEC\n' +
+    '0\nSECTION\n2\nENTITIES\n';
+  const footer = '0\nENDSEC\n0\nEOF\n';
+  return header + entities.join('') + footer;
+}
+
+btnDownloadDxf.addEventListener('click', () => {
+  if (!lastSvgContent) return;
+  let dxf;
+  try {
+    dxf = buildDxfFromSvg(lastSvgContent);
+  } catch (err) {
+    console.error('DXF 產生失敗:', err);
+    alert('DXF 產生失敗，請重試或改用 SVG。');
+    return;
+  }
+  const blob = new Blob([dxf], { type: 'application/dxf' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const baseName = originalFile ? originalFile.name.substring(0, originalFile.name.lastIndexOf('.')) : 'vectorline';
+  link.href = url;
+  link.download = `${baseName}_vector.dxf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+});
+
+// ----------------------------------------------------
+// Before / After comparison slider
+// ----------------------------------------------------
+const btnCompareToggle = document.getElementById('btn-compare-toggle');
+const compareLayer = document.getElementById('compare-layer');
+const compareFrame = document.getElementById('compare-frame');
+const compareBefore = document.getElementById('compare-before');
+const compareAfter = document.getElementById('compare-after');
+const compareDivider = document.getElementById('compare-divider');
+let compareActive = false;
+
+function setComparePct(pct) {
+  const p = Math.min(98, Math.max(2, pct));
+  compareBefore.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+  compareDivider.style.left = p + '%';
+}
+
+function refreshCompareImages() {
+  // "After" = current processed bitmap; "Before" = original upload
+  compareAfter.src = outputCanvas.toDataURL('image/png');
+  compareBefore.src = imgElement.src;
+}
+
+function openCompare() {
+  if (!originalFile) return;
+  compareActive = true;
+  refreshCompareImages();
+  setComparePct(50);
+  compareLayer.classList.remove('hidden');
+  btnCompareToggle.classList.add('active');
+}
+
+function closeCompare() {
+  compareActive = false;
+  compareLayer.classList.add('hidden');
+  btnCompareToggle.classList.remove('active');
+}
+
+if (btnCompareToggle) {
+  btnCompareToggle.addEventListener('click', () => {
+    if (compareActive) closeCompare();
+    else openCompare();
+  });
+}
+
+// Divider dragging (pointer events cover mouse + touch)
+let compareDragging = false;
+function compareMoveTo(clientX) {
+  const rect = compareFrame.getBoundingClientRect();
+  if (rect.width === 0) return;
+  setComparePct(((clientX - rect.left) / rect.width) * 100);
+}
+if (compareFrame) {
+  compareFrame.addEventListener('pointerdown', (e) => {
+    compareDragging = true;
+    compareFrame.setPointerCapture(e.pointerId);
+    compareMoveTo(e.clientX);
+  });
+  compareFrame.addEventListener('pointermove', (e) => {
+    if (compareDragging) compareMoveTo(e.clientX);
+  });
+  compareFrame.addEventListener('pointerup', () => { compareDragging = false; });
+  compareFrame.addEventListener('pointercancel', () => { compareDragging = false; });
+}
+
 // Presets & Reset Handlers
 function updateSliderValue(slider, textEl, value, suffix = '') {
   slider.value = value;
@@ -670,6 +861,14 @@ function onProcessingFinished(outBuffer, pathsSvgHtml, pathsCount, totalNodes) {
   // Update dynamic stats board
   statContours.textContent = pathsCount;
   statNodes.textContent = totalNodes;
+
+  // Enable the before/after compare tool now that we have output
+  const compareBtn = document.getElementById('btn-compare-toggle');
+  if (compareBtn) compareBtn.disabled = false;
+  // Keep the comparison overlay in sync if it is currently open
+  if (typeof compareActive !== 'undefined' && compareActive) {
+    refreshCompareImages();
+  }
 }
 
 // Theme Toggle Logic

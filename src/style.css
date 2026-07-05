@@ -3,71 +3,73 @@
    ---------------------------------------------------- */
 
 :root {
-  /* Light Theme Variables */
-  --bg-dark: #f8fafc; /* Slate-50: Clean soft light background */
-  --bg-card: #ffffff; /* Solid White */
-  --bg-card-border: #e2e8f0; /* Slate-200 */
-  --bg-card-hover-border: #cbd5e1; /* Slate-300 */
-  --bg-input: #f1f5f9; /* Slate-100 */
-  --bg-segmented: #e2e8f0; /* Slate-200 */
-  --bg-segmented-active: #ffffff;
-  
-  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #0d9488 100%); /* Indigo-500 to Teal-600 */
-  --primary-color: #6366f1; /* Indigo-500 */
-  --primary-light: #eef2ff; /* Indigo-50 */
-  --primary-hover: #4f46e5;
-  --accent-color: #0d9488; /* Teal-600 */
-  --danger-color: #ef4444; /* Red-500 */
-  --success-color: #10b981; /* Emerald-500 */
-  
-  --text-main: #0f172a; /* Slate-900: High readability main text */
-  --text-muted: #475569; /* Slate-600: Secondary descriptive text */
-  --text-dark: #64748b; /* Slate-500: Lighter captions */
-  --text-white: #ffffff;
-  
+  /* Light Theme — "Workshop / Handcraft" warm paper palette */
+  --bg-dark: #f4efe6; /* Warm misty paper background */
+  --bg-card: #fbf8f2; /* Warm off-white card */
+  --bg-card-border: #e2d9c8; /* Warm tan border */
+  --bg-card-hover-border: #c9bca4; /* Deeper tan on hover */
+  --bg-input: #efe8db; /* Toned paper input */
+  --bg-segmented: #e7ddcc; /* Segmented track */
+  --bg-segmented-active: #fbf8f2;
+
+  --primary-gradient: linear-gradient(135deg, #d97706 0%, #92400e 100%); /* Mono amber (no rainbow) */
+  --primary-color: #d97706; /* Amber-600 — the workshop accent */
+  --primary-light: #fbe6cf; /* Warm amber tint */
+  --primary-hover: #b45309; /* Amber-700 */
+  --accent-color: #b45309; /* Burnt amber secondary */
+  --danger-color: #dc2626; /* Red-600 */
+  --success-color: #4d7c0f; /* Olive-700 */
+
+  --text-main: #292524; /* Stone-800 charcoal */
+  --text-muted: #57534e; /* Stone-600 */
+  --text-dark: #78716c; /* Stone-500 captions */
+  --text-white: #fbf8f2;
+
   /* Fonts */
-  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --font-display: 'Archivo', 'Inter', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, sans-serif;
-  
-  /* Sizing and Layout */
-  --border-radius-lg: 16px;
-  --border-radius-md: 10px;
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.02);
-  --shadow-md: 0 4px 20px rgba(99, 102, 241, 0.06); 
-  --shadow-lg: 0 10px 30px rgba(99, 102, 241, 0.12);
-  
+
+  /* Sizing and Layout — tighter radii, harder shadows */
+  --border-radius-lg: 10px;
+  --border-radius-md: 8px;
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 1px 2px rgba(41, 37, 36, 0.08);
+  --shadow-md: 0 2px 0 rgba(41, 37, 36, 0.05), 0 4px 12px rgba(41, 37, 36, 0.08);
+  --shadow-lg: 0 3px 0 rgba(41, 37, 36, 0.06), 0 12px 24px rgba(41, 37, 36, 0.14);
+
   /* Checkerboard colors */
-  --checker-bg: #f8fafc;
-  --checker-color: #cbd5e1;
+  --checker-bg: #f4efe6;
+  --checker-color: #e2d9c8;
 }
 
-/* Dark Theme overrides applied to .dark-theme */
+/* Dark Theme — warm espresso / charcoal (not cold slate) */
 .app-container.dark-theme {
-  --bg-dark: #0f172a; /* Slate-900 */
-  --bg-card: #1e293b; /* Slate-800 */
-  --bg-card-border: #334155; /* Slate-700 */
-  --bg-card-hover-border: #475569; /* Slate-600 */
-  --bg-input: #0f172a; /* Slate-900 */
-  --bg-segmented: #0f172a;
-  --bg-segmented-active: #334155;
-  
-  --primary-color: #818cf8; /* Indigo-400 */
-  --primary-light: #312e81; /* Indigo-900 */
-  --primary-hover: #6366f1;
-  --accent-color: #2dd4bf; /* Teal-400 */
-  
-  --text-main: #f8fafc; /* Slate-50 */
-  --text-muted: #cbd5e1; /* Slate-300 */
-  --text-dark: #94a3b8; /* Slate-400 */
-  
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.4);
-  
+  --bg-dark: #1c1917; /* Stone-900 espresso */
+  --bg-card: #292524; /* Stone-800 */
+  --bg-card-border: #44403c; /* Stone-700 */
+  --bg-card-hover-border: #57534e; /* Stone-600 */
+  --bg-input: #1c1917;
+  --bg-segmented: #1c1917;
+  --bg-segmented-active: #44403c;
+
+  --primary-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --primary-color: #f59e0b; /* Amber-500 (brighter on dark) */
+  --primary-light: #451a03; /* Amber-950 */
+  --primary-hover: #fbbf24;
+  --accent-color: #fbbf24; /* Amber-400 */
+  --success-color: #84cc16; /* Lime-500 */
+
+  --text-main: #f5f0e8; /* Warm white */
+  --text-muted: #d6cfc4; /* Warm stone-300 */
+  --text-dark: #a8a29e; /* Stone-400 */
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 2px 0 rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 3px 0 rgba(0, 0, 0, 0.3), 0 15px 30px rgba(0, 0, 0, 0.5);
+
   /* Checkerboard colors */
-  --checker-bg: #1e293b;
-  --checker-color: #0f172a;
+  --checker-bg: #292524;
+  --checker-color: #1c1917;
 }
 
 /* Reset */
@@ -298,9 +300,24 @@ body {
   display: flex;
   min-height: 0; /* Important for flex child scrolling */
   position: relative;
-  background: var(--bg-dark);
+  background-color: var(--bg-dark);
+  /* Faint blueprint/paper grid texture — gives the surface a hand-made workshop feel */
+  background-image:
+    linear-gradient(var(--bg-card-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-card-border) 1px, transparent 1px);
+  background-size: 26px 26px;
   transition: background-color 0.3s ease;
 }
+.app-main::before {
+  /* Soften the grid so it reads as texture, not a hard table */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-dark);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.app-main > * { position: relative; z-index: 1; }
 
 /* Left Sidebar Panel */
 .app-sidebar {
@@ -347,7 +364,8 @@ body {
 .group-label {
   font-family: var(--font-display);
   font-size: 1.0rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.2px;
   color: var(--text-main);
   margin-bottom: 12px;
   border-left: 4px solid var(--primary-color);
@@ -409,20 +427,21 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* Cohesive warm earth tones instead of the AI violet/teal/pink rainbow */
 .tab-trigger[data-tab="tab-filters"].active {
-  color: #8b5cf6; /* Violet */
+  color: #c2410c; /* Terracotta */
 }
 
 .tab-trigger[data-tab="tab-binarize"].active {
-  color: #0d9488; /* Teal */
+  color: #a16207; /* Ochre */
 }
 
 .tab-trigger[data-tab="tab-vector"].active {
-  color: #d97706; /* Amber */
+  color: #4d7c0f; /* Olive */
 }
 
 .tab-trigger[data-tab="tab-export"].active {
-  color: #ec4899; /* Pink */
+  color: #9a3412; /* Rust */
 }
 
 .tab-contents-container {
@@ -483,12 +502,12 @@ body {
 .drop-zone:hover {
   border-color: var(--primary-color);
   background: var(--primary-light);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.04);
+  box-shadow: 0 4px 12px rgba(146, 64, 14, 0.05);
 }
 
 .drop-zone.drag-over {
   border-color: var(--accent-color);
-  background: #f0fdfa; /* Soft teal bg */
+  background: var(--primary-light); /* Warm amber tint */
 }
 
 .file-input {
@@ -638,7 +657,7 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--primary-color);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 6px rgba(146, 64, 14, 0.35);
   transition: transform 0.1s ease, background-color 0.1s ease;
   border: 2px solid var(--bg-card);
 }
@@ -655,7 +674,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
   background: var(--primary-color);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 6px rgba(146, 64, 14, 0.35);
   transition: transform 0.1s ease, background-color 0.1s ease;
   border: 2px solid var(--bg-card);
 }
@@ -804,7 +823,7 @@ input[type="range"]::-moz-range-thumb:hover {
   background: var(--primary-color);
   color: white;
   border-color: var(--primary-hover);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 2px 8px rgba(146, 64, 14, 0.18);
 }
 
 .btn-reset {
@@ -869,7 +888,7 @@ input[type="range"]::-moz-range-thumb:hover {
 .btn-primary {
   background: var(--primary-gradient);
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 3px 0 rgba(146, 64, 14, 0.35), 0 4px 12px rgba(146, 64, 14, 0.18);
 }
 
 .btn-primary:hover {
@@ -1021,11 +1040,139 @@ input[type="range"]::-moz-range-thumb:hover {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-main);
-  padding: 10px 14px;
+  padding: 8px 14px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--bg-card-border);
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+/* Pane toolbar button (e.g. before/after compare toggle) */
+.btn-pane-tool {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--bg-card-border);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.btn-pane-tool svg { width: 13px; height: 13px; }
+.btn-pane-tool:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: var(--primary-light);
+}
+.btn-pane-tool.active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: #fff;
+}
+.btn-pane-tool:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Before / After comparison overlay */
+.compare-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: var(--checker-bg);
+  background-image:
+    linear-gradient(45deg, var(--checker-color) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--checker-color) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--checker-color) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--checker-color) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+.compare-frame {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  box-shadow: var(--shadow-lg);
+  border-radius: 4px;
+  overflow: hidden;
+  user-select: none;
+}
+.compare-frame img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 320px);
+  width: auto;
+  height: auto;
+  background: #fff;
+}
+.compare-before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Left portion reveals the original; divider clips the right side */
+  clip-path: inset(0 50% 0 0);
+}
+.compare-divider {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: var(--primary-color);
+  cursor: ew-resize;
+  z-index: 5;
+}
+.compare-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(41, 37, 36, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.compare-handle svg { width: 13px; height: 13px; }
+.compare-tag {
+  position: absolute;
+  top: 8px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #fff;
+  line-height: 1.4;
+}
+.compare-tag-before { left: 8px; background: rgba(41, 37, 36, 0.75); }
+.compare-tag-after { right: 8px; background: var(--primary-color); }
+
+/* Split download row (DXF + PNG side by side) */
+.download-row-split {
+  display: flex;
+  gap: 10px;
+}
+.download-row-split .btn { flex: 1; padding: 10px 12px; font-size: 0.9rem; }
 
 /* Canvas/SVG containers */
 .canvas-container, .svg-container {
@@ -1049,7 +1196,7 @@ input[type="range"]::-moz-range-thumb:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   background: white;
   padding: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--bg-card-border);
 }
 
 /* Grid Checkerboard pattern */
@@ -1304,15 +1451,15 @@ input[type="range"]::-moz-range-thumb:hover {
 
 .footer-link:hover {
   text-decoration: underline;
-  color: #4f46e5;
+  color: var(--primary-hover);
 }
 
 .app-container.dark-theme .footer-link {
-  color: #2dd4bf; /* Bright teal accent for dark theme footer links */
+  color: var(--primary-color); /* Warm amber accent for dark theme footer links */
 }
 
 .app-container.dark-theme .footer-link:hover {
-  color: #0d9488;
+  color: var(--primary-hover);
 }
 
 /* ==========================================================================
@@ -1544,32 +1691,32 @@ input[type="range"]::-moz-range-thumb:hover {
   width: 220px;
 }
 
-/* Light Theme Active Tab Backgrounds (Vibrant pastel tint) */
+/* Light Theme Active Tab Backgrounds (warm earth tint) */
 .settings-card-tabs:has(#tab-filters.active) .tab-contents-container {
-  background-color: rgba(139, 92, 246, 0.05); /* Violet-50 tint */
+  background-color: rgba(194, 65, 12, 0.05); /* Terracotta tint */
 }
 .settings-card-tabs:has(#tab-binarize.active) .tab-contents-container {
-  background-color: rgba(13, 148, 136, 0.05); /* Teal-50 tint */
+  background-color: rgba(161, 98, 7, 0.05); /* Ochre tint */
 }
 .settings-card-tabs:has(#tab-vector.active) .tab-contents-container {
-  background-color: rgba(217, 119, 6, 0.05); /* Amber-50 tint */
+  background-color: rgba(77, 124, 15, 0.05); /* Olive tint */
 }
 .settings-card-tabs:has(#tab-export.active) .tab-contents-container {
-  background-color: rgba(236, 72, 153, 0.05); /* Pink-50 tint */
+  background-color: rgba(154, 52, 18, 0.05); /* Rust tint */
 }
 
-/* Dark Theme Active Tab Backgrounds (Deep subtle tint) */
+/* Dark Theme Active Tab Backgrounds (deep warm tint) */
 .app-container.dark-theme .settings-card-tabs:has(#tab-filters.active) .tab-contents-container {
-  background-color: rgba(139, 92, 246, 0.12); /* Dark Violet tint */
+  background-color: rgba(194, 65, 12, 0.14); /* Dark Terracotta tint */
 }
 .app-container.dark-theme .settings-card-tabs:has(#tab-binarize.active) .tab-contents-container {
-  background-color: rgba(45, 212, 191, 0.12); /* Dark Teal tint */
+  background-color: rgba(202, 138, 4, 0.14); /* Dark Ochre tint */
 }
 .app-container.dark-theme .settings-card-tabs:has(#tab-vector.active) .tab-contents-container {
-  background-color: rgba(245, 158, 11, 0.12); /* Dark Amber tint */
+  background-color: rgba(101, 163, 13, 0.14); /* Dark Olive tint */
 }
 .app-container.dark-theme .settings-card-tabs:has(#tab-export.active) .tab-contents-container {
-  background-color: rgba(236, 72, 153, 0.12); /* Dark Pink tint */
+  background-color: rgba(154, 52, 18, 0.14); /* Dark Rust tint */
 }
 
 /* Dark theme tooltip adjustments */

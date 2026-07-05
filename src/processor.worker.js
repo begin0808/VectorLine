@@ -319,6 +319,23 @@ self.onmessage = function(e) {
 
       const pathsCount = paths.length;
 
+      // Compute bounding boxes and canvas area coverage ratios
+      const canvasArea = binary.cols * binary.rows;
+      for (const p of paths) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const [x, y] of p.pts) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+        const bboxArea = (maxX - minX) * (maxY - minY);
+        p.bboxRatio = bboxArea / canvasArea;
+      }
+
+      // Check if any path spans > 70% of the canvas area
+      const hasLargeFrame = paths.some(p => p.bboxRatio > 0.70);
+
       // Find the index of the path with the largest area (the overall outer frame or largest silhouette)
       let maxAreaIdx = -1;
       let maxArea = -1;
@@ -333,13 +350,16 @@ self.onmessage = function(e) {
       let pathsSvgHtml = '';
       if (layerMode === 'auto-layer' && !isCenterline) {
         // Group paths by layer colors (Outer cut-out contours are Red, inner details are Black)
-        // Red (Cut): The largest contour OR any external contour that has children inside it
-        // Black (Engrave): All other contours (holes, internal details, standalone stroke lines)
         const outerPaths = [];
         const innerPaths = [];
         for (let i = 0; i < paths.length; i++) {
           const p = paths[i];
-          const isOuterCut = (i === maxAreaIdx);
+          let isOuterCut = false;
+          if (hasLargeFrame) {
+            isOuterCut = (p.bboxRatio > 0.70);
+          } else {
+            isOuterCut = (i === maxAreaIdx);
+          }
           if (isOuterCut) {
             outerPaths.push(p);
           } else {

@@ -263,9 +263,11 @@ self.onmessage = function(e) {
       const layerMode = params.layerMode; // 'single' or 'auto-layer'
 
       const isCenterline = selectedMode === 'centerline';
-      const useFill = fillMode && !isCenterline;
+      const isCenterline = selectedMode === 'centerline';
+      // Force stroke mode (useFill = false) in auto-layer mode to prevent weird filled blobs
+      const useFill = fillMode && !isCenterline && (layerMode !== 'auto-layer');
 
-      let paths = []; // each: { pts, closed, isExternal }
+      let paths = []; // each: { pts, closed, isExternal, area, childIdx }
       let totalNodes = 0;
 
       if (isCenterline) {
@@ -275,7 +277,7 @@ self.onmessage = function(e) {
           if (poly.length < minLen) continue;
           const simplified = rdpSimplify(poly, simplifyVal);
           if (simplified.length >= 2) {
-            paths.push({ pts: simplified, closed: false, isExternal: true });
+            paths.push({ pts: simplified, closed: false, isExternal: true, area: 0, childIdx: -1 });
             totalNodes += simplified.length;
           }
         }
@@ -288,7 +290,8 @@ self.onmessage = function(e) {
         
         for (let i = 0; i < contours.size(); ++i) {
           const contour = contours.get(i);
-          if (cv.contourArea(contour) < minAreaVal) {
+          const area = cv.contourArea(contour);
+          if (area < minAreaVal) {
             contour.delete();
             continue;
           }
@@ -301,12 +304,13 @@ self.onmessage = function(e) {
             }
             
             // Check hierarchy array
-            // hierarchy.data32S[i * 4 + 3] stores the index of parent contour.
-            // parentIdx === -1 means it is an outermost parent contour (exterior shape boundary).
+            // hierarchy.data32S[i * 4 + 2] stores the child contour index (first_child)
+            // hierarchy.data32S[i * 4 + 3] stores the parent contour index (parent)
+            const childIdx = hierarchy.data32S[i * 4 + 2];
             const parentIdx = hierarchy.data32S[i * 4 + 3];
             const isExternal = (parentIdx === -1);
             
-            paths.push({ pts, closed: true, isExternal });
+            paths.push({ pts, closed: true, isExternal, area, childIdx });
             totalNodes += approx.rows;
           }
           approx.delete();
@@ -316,31 +320,41 @@ self.onmessage = function(e) {
 
       const pathsCount = paths.length;
 
+      // Find the index of the path with the largest area (the overall outer frame or largest silhouette)
+      let maxAreaIdx = -1;
+      let maxArea = -1;
+      for (let i = 0; i < paths.length; i++) {
+        if (paths[i].area > maxArea) {
+          maxArea = paths[i].area;
+          maxAreaIdx = i;
+        }
+      }
+
       // Build SVG Paths
       let pathsSvgHtml = '';
       if (layerMode === 'auto-layer' && !isCenterline) {
-        // Group paths by layer colors (Outer silhouette cut-outs are Red, inner details are Black/selectedColor)
-        const outerPaths = paths.filter(p => p.isExternal);
-        const innerPaths = paths.filter(p => !p.isExternal);
+        // Group paths by layer colors (Outer cut-out contours are Red, inner details are Black)
+        // Red (Cut): The largest contour OR any external contour that has children inside it
+        // Black (Engrave): All other contours (holes, internal details, standalone stroke lines)
+        const outerPaths = [];
+        const innerPaths = [];
+        for (let i = 0; i < paths.length; i++) {
+          const p = paths[i];
+          const isOuterCut = (i === maxAreaIdx) || (p.isExternal && p.childIdx !== -1);
+          if (isOuterCut) {
+            outerPaths.push(p);
+          } else {
+            innerPaths.push(p);
+          }
+        }
 
-        if (useFill) {
-          const outerD = outerPaths.map(p => pointsToPathD(p.pts, true, smoothMode)).join(' ');
-          const innerD = innerPaths.map(p => pointsToPathD(p.pts, true, smoothMode)).join(' ');
-          if (outerD) {
-            pathsSvgHtml += `  <path d="${outerD}" fill="#ff0000" fill-rule="evenodd" stroke="none" />\n`;
-          }
-          if (innerD) {
-            pathsSvgHtml += `  <path d="${innerD}" fill="${selectedColor}" fill-rule="evenodd" stroke="none" />\n`;
-          }
-        } else {
-          const outerD = outerPaths.map(p => pointsToPathD(p.pts, p.closed, smoothMode)).join(' ');
-          const innerD = innerPaths.map(p => pointsToPathD(p.pts, p.closed, smoothMode)).join(' ');
-          if (outerD) {
-            pathsSvgHtml += `  <path d="${outerD}" fill="none" stroke="#ff0000" stroke-width="1.5" />\n`;
-          }
-          if (innerD) {
-            pathsSvgHtml += `  <path d="${innerD}" fill="none" stroke="${selectedColor}" stroke-width="1" />\n`;
-          }
+        const outerD = outerPaths.map(p => pointsToPathD(p.pts, p.closed, smoothMode)).join(' ');
+        const innerD = innerPaths.map(p => pointsToPathD(p.pts, p.closed, smoothMode)).join(' ');
+        if (outerD) {
+          pathsSvgHtml += `  <path d="${outerD}" fill="none" stroke="#ff0000" stroke-width="1.5" />\n`;
+        }
+        if (innerD) {
+          pathsSvgHtml += `  <path d="${innerD}" fill="none" stroke="#000000" stroke-width="1" />\n`;
         }
       } else {
         // Single Color Mode

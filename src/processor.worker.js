@@ -1,16 +1,16 @@
 // processor.worker.js
-// Load OpenCV.js WebAssembly runtime locally from the site root
-self.importScripts("/opencv.js");
-
 let opencvReady = false;
 
-// Emscripten runtime hook for Worker environment
+// Emscripten runtime hook for Worker environment (MUST be declared BEFORE importScripts!)
 self.Module = {
   onRuntimeInitialized: function() {
     opencvReady = true;
     self.postMessage({ type: 'ready' });
   }
 };
+
+// Load OpenCV.js WebAssembly runtime locally from the site root
+self.importScripts("/opencv.js");
 
 // Safety double check in case script is loaded synchronously or cached
 if (typeof cv !== 'undefined' && cv.Mat) {

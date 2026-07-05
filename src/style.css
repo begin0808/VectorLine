@@ -406,12 +406,30 @@ body {
 
 .tab-trigger.active {
   background: var(--bg-segmented-active);
-  color: var(--primary-color);
   box-shadow: var(--shadow-sm);
+}
+
+.tab-trigger[data-tab="tab-filters"].active {
+  color: #8b5cf6; /* Violet */
+}
+
+.tab-trigger[data-tab="tab-binarize"].active {
+  color: #0d9488; /* Teal */
+}
+
+.tab-trigger[data-tab="tab-vector"].active {
+  color: #d97706; /* Amber */
+}
+
+.tab-trigger[data-tab="tab-export"].active {
+  color: #ec4899; /* Pink */
 }
 
 .tab-contents-container {
   padding: 16px;
+  border-bottom-left-radius: 9px; /* Ensure background matches rounded card corners */
+  border-bottom-right-radius: 9px;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Butter smooth color transition */
 }
 
 .settings-tab-content {
@@ -1475,7 +1493,7 @@ input[type="range"]::-moz-range-thumb:hover {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 135%;
-  right: -30px; /* Offset right by 30px so it stays inside the sidebar */
+  right: -50px; /* Offset right by 50px so it stays safely inside the card borders */
   left: auto;
   transform: scale(0.9);
   background: #1e293b; /* Dark background in light mode */
@@ -1486,7 +1504,7 @@ input[type="range"]::-moz-range-thumb:hover {
   font-family: var(--font-body);
   font-weight: 500;
   line-height: 1.4;
-  width: 220px;
+  width: 180px; /* Narrower width to guarantee left edge stays within card border */
   white-space: normal;
   box-shadow: var(--shadow-lg);
   opacity: 0;
@@ -1497,12 +1515,41 @@ input[type="range"]::-moz-range-thumb:hover {
   text-align: left;
 }
 
-/* Tooltip Box for Right Growing Tooltips (Pops DOWNWARDS to avoid viewport top ceiling clipping) */
+/* Tooltip Box for Right Growing Tooltips (Pops DOWNWARDS, wider 220px fits fine in workspace) */
 .info-icon.tooltip-right::after {
   bottom: auto;
   top: 135%; /* Grow downwards */
   left: -30px; /* Offset left by 30px so it grows rightward and stays inside the pane */
   right: auto;
+  width: 220px;
+}
+
+/* Light Theme Active Tab Backgrounds (Vibrant pastel tint) */
+.settings-card-tabs:has(#tab-filters.active) .tab-contents-container {
+  background-color: rgba(139, 92, 246, 0.05); /* Violet-50 tint */
+}
+.settings-card-tabs:has(#tab-binarize.active) .tab-contents-container {
+  background-color: rgba(13, 148, 136, 0.05); /* Teal-50 tint */
+}
+.settings-card-tabs:has(#tab-vector.active) .tab-contents-container {
+  background-color: rgba(217, 119, 6, 0.05); /* Amber-50 tint */
+}
+.settings-card-tabs:has(#tab-export.active) .tab-contents-container {
+  background-color: rgba(236, 72, 153, 0.05); /* Pink-50 tint */
+}
+
+/* Dark Theme Active Tab Backgrounds (Deep subtle tint) */
+.app-container.dark-theme .settings-card-tabs:has(#tab-filters.active) .tab-contents-container {
+  background-color: rgba(139, 92, 246, 0.12); /* Dark Violet tint */
+}
+.app-container.dark-theme .settings-card-tabs:has(#tab-binarize.active) .tab-contents-container {
+  background-color: rgba(45, 212, 191, 0.12); /* Dark Teal tint */
+}
+.app-container.dark-theme .settings-card-tabs:has(#tab-vector.active) .tab-contents-container {
+  background-color: rgba(245, 158, 11, 0.12); /* Dark Amber tint */
+}
+.app-container.dark-theme .settings-card-tabs:has(#tab-export.active) .tab-contents-container {
+  background-color: rgba(236, 72, 153, 0.12); /* Dark Pink tint */
 }
 
 /* Dark theme tooltip adjustments */

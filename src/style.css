@@ -368,12 +368,9 @@ body {
   padding: 4px;
   border-bottom: 1px solid var(--bg-card-border);
   gap: 4px;
-  overflow-x: auto;
-}
-
-/* Hide scrollbar on tabs bar for clean appearance */
-.settings-tabs-bar::-webkit-scrollbar {
-  display: none;
+  overflow: hidden; /* Disable scrolling to avoid scrollbar height reservations */
+  flex-wrap: nowrap; /* Force tabs on a single line */
+  flex-shrink: 0;
 }
 
 .tab-trigger {
@@ -381,7 +378,10 @@ body {
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 8px 4px;
+  height: 30px; /* Solid fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -390,6 +390,7 @@ body {
   transition: var(--transition-smooth);
   text-align: center;
   white-space: nowrap;
+  line-height: 1;
 }
 
 .tab-trigger:hover {

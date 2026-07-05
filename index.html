@@ -450,7 +450,12 @@
           <div class="preview-grid">
             <!-- Canvas Preview -->
             <div class="preview-pane">
-              <div class="pane-header">1. 處理後黑白線條</div>
+              <div class="pane-header label-with-tooltip">
+                <span>1. 點陣黑白圖 (雕刻用)</span>
+                <span class="info-icon" data-tooltip="「點陣點點圖」由像素點組成，放大會有鋸齒馬賽克。適合雷射機進行點陣掃描雕刻，對應儲存按鈕為「下載 PNG 線條圖」。">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                </span>
+              </div>
               <div class="canvas-container checkerboard">
                 <canvas id="output-canvas"></canvas>
                 <div id="empty-state-canvas" class="empty-state">
@@ -466,7 +471,12 @@
 
             <!-- SVG Vector Preview -->
             <div class="preview-pane">
-              <div class="pane-header">2. 向量 SVG 預覽</div>
+              <div class="pane-header label-with-tooltip">
+                <span>2. 向量切割路徑 (切割用)</span>
+                <span class="info-icon" data-tooltip="「向量軌跡」由數學線段與曲線組成，放大無限倍仍平滑。適合雷射機沿線切透，對應儲存按鈕為「下載 SVG 向量檔」。">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                </span>
+              </div>
               <div class="svg-container checkerboard">
                 <div id="svg-preview-wrapper">
                   <img id="svg-preview" class="hidden" alt="SVG 向量預覽">

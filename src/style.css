@@ -359,7 +359,7 @@ body {
   padding: 0 !important;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* Allow tooltips to overflow the card boundary */
 }
 
 .settings-tabs-bar {
@@ -371,6 +371,8 @@ body {
   overflow: hidden; /* Disable scrolling to avoid scrollbar height reservations */
   flex-wrap: nowrap; /* Force tabs on a single line */
   flex-shrink: 0;
+  border-top-left-radius: 9px; /* Match card rounded corners */
+  border-top-right-radius: 9px;
 }
 
 .tab-trigger {
@@ -1448,8 +1450,9 @@ input[type="range"]::-moz-range-thumb:hover {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 135%;
-  left: 50%;
-  transform: translateX(-50%) scale(0.9);
+  right: -30px; /* Align to the right side of the icon with 30px offset to prevent right-clipping */
+  left: auto;
+  transform: scale(0.9);
   background: #1e293b; /* Dark background in light mode */
   color: #f8fafc;
   padding: 8px 12px;
@@ -1481,7 +1484,7 @@ input[type="range"]::-moz-range-thumb:hover {
   position: absolute;
   bottom: 120%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%); /* Keeps triangle centered directly on the icon */
   border-width: 6px;
   border-style: solid;
   border-color: #1e293b transparent transparent transparent;
@@ -1497,9 +1500,14 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 /* Hover animations */
-.info-icon:hover::after,
+.info-icon:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
 .info-icon:hover::before {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) scale(1);
+  transform: translateX(-50%);
 }

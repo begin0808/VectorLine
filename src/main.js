@@ -878,8 +878,8 @@ if (btnThemeToggle) {
   const sunIcon = document.querySelector('.sun-icon');
   const moonIcon = document.querySelector('.moon-icon');
   
-  // Default to dark mode
-  const savedTheme = localStorage.getItem('theme') || 'dark';
+  // Default to light mode
+  const savedTheme = localStorage.getItem('theme') || 'light';
   if (savedTheme === 'dark') {
     appContainer.classList.add('dark-theme');
     sunIcon.classList.remove('hidden');

@@ -331,10 +331,17 @@ self.onmessage = function(e) {
         }
         const bboxArea = (maxX - minX) * (maxY - minY);
         p.bboxRatio = bboxArea / canvasArea;
+        p.bbox = { minX, minY, maxX, maxY };
       }
 
-      // Check if any path spans > 70% of the canvas area
-      const hasLargeFrame = paths.some(p => p.bboxRatio > 0.70);
+      // Check if any path touches the canvas border (within 6px margin)
+      const borderMargin = 6;
+      const touchesBorder = paths.some(p => 
+        p.bbox.minX <= borderMargin || 
+        p.bbox.minY <= borderMargin || 
+        p.bbox.maxX >= binary.cols - borderMargin || 
+        p.bbox.maxY >= binary.rows - borderMargin
+      );
 
       // Find the index of the path with the largest area (the overall outer frame or largest silhouette)
       let maxAreaIdx = -1;
@@ -349,21 +356,32 @@ self.onmessage = function(e) {
       // Build SVG Paths
       let pathsSvgHtml = '';
       if (layerMode === 'auto-layer' && !isCenterline) {
-        // Group paths by layer colors (Outer cut-out contours are Red, inner details are Black)
         const outerPaths = [];
         const innerPaths = [];
-        for (let i = 0; i < paths.length; i++) {
-          const p = paths[i];
-          let isOuterCut = false;
-          if (hasLargeFrame) {
-            isOuterCut = (p.bboxRatio > 0.70);
-          } else {
-            isOuterCut = (i === maxAreaIdx);
-          }
-          if (isOuterCut) {
-            outerPaths.push(p);
-          } else {
+        
+        if (touchesBorder) {
+          // Photo mode: Add a clean outer rectangular cutting path at the image boundary
+          const borderPts = [
+            [2, 2],
+            [binary.cols - 2, 2],
+            [binary.cols - 2, binary.rows - 2],
+            [2, binary.rows - 2]
+          ];
+          outerPaths.push({ pts: borderPts, closed: true });
+          
+          // All detected image paths are details (Engrave/Black)
+          for (const p of paths) {
             innerPaths.push(p);
+          }
+        } else {
+          // Silhouette mode: Largest path is Red, others are Black
+          for (let i = 0; i < paths.length; i++) {
+            const p = paths[i];
+            if (i === maxAreaIdx) {
+              outerPaths.push(p);
+            } else {
+              innerPaths.push(p);
+            }
           }
         }
 

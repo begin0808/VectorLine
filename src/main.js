@@ -878,8 +878,10 @@ function processImage() {
     const blob = new Blob([lastSvgContent], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     svgPreview.src = url;
-    svgPreview.style.width = `${width}px`;
-    svgPreview.style.height = `${height}px`;
+    svgPreview.style.width = '';
+    svgPreview.style.height = '';
+    svgPreview.setAttribute('width', width);
+    svgPreview.setAttribute('height', height);
     svgPreview.classList.remove('hidden');
     
     // Show SVG zoom helper instruction

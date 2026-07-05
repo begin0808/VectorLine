@@ -1022,6 +1022,8 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 #output-canvas, #svg-preview {
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
@@ -1429,23 +1431,37 @@ input[type="range"]::-moz-range-thumb:hover {
   justify-content: center;
   cursor: help;
   position: relative;
-  color: var(--primary-color);
-  background: var(--primary-light);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #d97706; /* Vibrant Amber-600 */
+  background: #fef3c7; /* Soft Amber-100 fill */
+  border: 1px solid rgba(217, 119, 6, 0.3);
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  opacity: 0.85;
+  opacity: 0.95;
   transition: var(--transition-smooth);
   flex-shrink: 0;
 }
 
+/* Dark mode override for info badge */
+.app-container.dark-theme .info-icon {
+  color: #fbbf24; /* Bright Amber-400 */
+  background: rgba(120, 53, 15, 0.6); /* Translucent dark amber-900 background */
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
 .info-icon:hover {
   opacity: 1;
-  background: var(--primary-color);
-  color: var(--text-white);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+  background: #d97706;
+  color: var(--text-white) !important;
+  border-color: #d97706;
+  box-shadow: 0 0 8px rgba(217, 119, 6, 0.5);
+}
+
+.app-container.dark-theme .info-icon:hover {
+  background: #fbbf24;
+  color: #0f172a !important;
+  border-color: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
 }
 
 .info-icon svg {
@@ -1454,7 +1470,7 @@ input[type="range"]::-moz-range-thumb:hover {
   display: block;
 }
 
-/* Tooltip Box (Default: aligns to the right side of the icon and grows leftward) */
+/* Tooltip Box (Default: aligns to the right side of the icon and grows leftward, popping UP) */
 .info-icon::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -1481,8 +1497,10 @@ input[type="range"]::-moz-range-thumb:hover {
   text-align: left;
 }
 
-/* Tooltip Box for Right Growing Tooltips (e.g. workspace preview pane headers) */
+/* Tooltip Box for Right Growing Tooltips (Pops DOWNWARDS to avoid viewport top ceiling clipping) */
 .info-icon.tooltip-right::after {
+  bottom: auto;
+  top: 135%; /* Grow downwards */
   left: -30px; /* Offset left by 30px so it grows rightward and stays inside the pane */
   right: auto;
 }
@@ -1493,7 +1511,7 @@ input[type="range"]::-moz-range-thumb:hover {
   color: #0f172a;
 }
 
-/* Tooltip Triangle */
+/* Tooltip Triangle (Default: points DOWNWARD, sitting above the icon) */
 .info-icon::before {
   content: '';
   position: absolute;
@@ -1510,8 +1528,19 @@ input[type="range"]::-moz-range-thumb:hover {
   z-index: 1000;
 }
 
+/* Triangle for Downward popping Tooltips (Points UPWARD, sitting below the icon) */
+.info-icon.tooltip-right::before {
+  bottom: auto;
+  top: 120%;
+  border-color: transparent transparent #1e293b transparent;
+}
+
 .app-container.dark-theme .info-icon::before {
   border-color: #cbd5e1 transparent transparent transparent;
+}
+
+.app-container.dark-theme .info-icon.tooltip-right::before {
+  border-color: transparent transparent #cbd5e1 transparent;
 }
 
 /* Hover animations */

@@ -334,14 +334,21 @@ self.onmessage = function(e) {
         p.bbox = { minX, minY, maxX, maxY };
       }
 
-      // Check if any path touches the canvas border (within 6px margin)
-      const borderMargin = 6;
-      const touchesBorder = paths.some(p => 
-        p.bbox.minX <= borderMargin || 
-        p.bbox.minY <= borderMargin || 
-        p.bbox.maxX >= binary.cols - borderMargin || 
-        p.bbox.maxY >= binary.rows - borderMargin
-      );
+      // Check the global bounding box of all paths combined to see if it fills the canvas
+      let globalMinX = Infinity, globalMinY = Infinity, globalMaxX = -Infinity, globalMaxY = -Infinity;
+      for (const p of paths) {
+        if (p.bbox.minX < globalMinX) globalMinX = p.bbox.minX;
+        if (p.bbox.minY < globalMinY) globalMinY = p.bbox.minY;
+        if (p.bbox.maxX > globalMaxX) globalMaxX = p.bbox.maxX;
+        if (p.bbox.maxY > globalMaxY) globalMaxY = p.bbox.maxY;
+      }
+      const globalWidth = globalMaxX - globalMinX;
+      const globalHeight = globalMaxY - globalMinY;
+      const widthRatio = globalWidth / binary.cols;
+      const heightRatio = globalHeight / binary.rows;
+      
+      // If the drawing elements fill more than 85% of both width and height, it's a full-bleed photo
+      const isFullBleedPhoto = (widthRatio > 0.85 && heightRatio > 0.85);
 
       // Find the index of the path with the largest area (the overall outer frame or largest silhouette)
       let maxAreaIdx = -1;
@@ -359,7 +366,7 @@ self.onmessage = function(e) {
         const outerPaths = [];
         const innerPaths = [];
         
-        if (touchesBorder) {
+        if (isFullBleedPhoto) {
           // Photo mode: Add a clean outer rectangular cutting path at the image boundary
           const borderPts = [
             [2, 2],

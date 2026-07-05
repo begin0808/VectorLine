@@ -339,7 +339,7 @@ self.onmessage = function(e) {
         const innerPaths = [];
         for (let i = 0; i < paths.length; i++) {
           const p = paths[i];
-          const isOuterCut = (i === maxAreaIdx) || (p.isExternal && p.area > maxArea * 0.15);
+          const isOuterCut = (i === maxAreaIdx);
           if (isOuterCut) {
             outerPaths.push(p);
           } else {

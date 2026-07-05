@@ -263,7 +263,6 @@ self.onmessage = function(e) {
       const layerMode = params.layerMode; // 'single' or 'auto-layer'
 
       const isCenterline = selectedMode === 'centerline';
-      const isCenterline = selectedMode === 'centerline';
       // Force stroke mode (useFill = false) in auto-layer mode to prevent weird filled blobs
       const useFill = fillMode && !isCenterline && (layerMode !== 'auto-layer');
 

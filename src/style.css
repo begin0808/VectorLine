@@ -964,7 +964,7 @@ input[type="range"]::-moz-range-thumb:hover {
   flex-direction: column;
   min-height: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: visible; /* Allow preview pane headers tooltips to pop out */
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -994,7 +994,7 @@ input[type="range"]::-moz-range-thumb:hover {
   border: 1px solid var(--bg-card-border);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible; /* Allow help tooltips to float above the pane */
   transition: var(--transition-smooth);
 }
 
@@ -1429,28 +1429,37 @@ input[type="range"]::-moz-range-thumb:hover {
   justify-content: center;
   cursor: help;
   position: relative;
-  color: var(--text-dark);
-  opacity: 0.6;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  opacity: 0.85;
   transition: var(--transition-smooth);
+  flex-shrink: 0;
 }
 
 .info-icon:hover {
   opacity: 1;
-  color: var(--primary-color);
+  background: var(--primary-color);
+  color: var(--text-white);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
 }
 
 .info-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   display: block;
 }
 
-/* Tooltip Box */
+/* Tooltip Box (Default: aligns to the right side of the icon and grows leftward) */
 .info-icon::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 135%;
-  right: -30px; /* Align to the right side of the icon with 30px offset to prevent right-clipping */
+  right: -30px; /* Offset right by 30px so it stays inside the sidebar */
   left: auto;
   transform: scale(0.9);
   background: #1e293b; /* Dark background in light mode */
@@ -1470,6 +1479,12 @@ input[type="range"]::-moz-range-thumb:hover {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   text-align: left;
+}
+
+/* Tooltip Box for Right Growing Tooltips (e.g. workspace preview pane headers) */
+.info-icon.tooltip-right::after {
+  left: -30px; /* Offset left by 30px so it grows rightward and stays inside the pane */
+  right: auto;
 }
 
 /* Dark theme tooltip adjustments */
@@ -1503,6 +1518,10 @@ input[type="range"]::-moz-range-thumb:hover {
 .info-icon:hover::after {
   opacity: 1;
   visibility: visible;
+  transform: scale(1);
+}
+
+.info-icon.tooltip-right:hover::after {
   transform: scale(1);
 }
 

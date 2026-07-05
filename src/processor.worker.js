@@ -309,8 +309,6 @@ self.onmessage = function(e) {
             const parentIdx = hierarchy.data32S[i * 4 + 3];
             const isExternal = (parentIdx === -1);
             
-            console.log(`Worker Trace: contour ${i}, area ${area.toFixed(0)}, parent ${parentIdx}, child ${childIdx}`);
-            
             paths.push({ pts, closed: true, isExternal, area, childIdx });
             totalNodes += approx.rows;
           }

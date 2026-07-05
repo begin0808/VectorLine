@@ -1022,8 +1022,8 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 #output-canvas, #svg-preview {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
@@ -1431,9 +1431,9 @@ input[type="range"]::-moz-range-thumb:hover {
   justify-content: center;
   cursor: help;
   position: relative;
-  color: #d97706; /* Vibrant Amber-600 */
-  background: #fef3c7; /* Soft Amber-100 fill */
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  color: #ef4444; /* Vibrant Crimson Red-500 */
+  background: #fee2e2; /* Soft Red-100 fill */
+  border: 1px solid rgba(239, 68, 68, 0.3);
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -1444,24 +1444,24 @@ input[type="range"]::-moz-range-thumb:hover {
 
 /* Dark mode override for info badge */
 .app-container.dark-theme .info-icon {
-  color: #fbbf24; /* Bright Amber-400 */
-  background: rgba(120, 53, 15, 0.6); /* Translucent dark amber-900 background */
-  border-color: rgba(251, 191, 36, 0.3);
+  color: #fca5a5; /* Bright Red-300 */
+  background: rgba(153, 27, 27, 0.6); /* Translucent dark red-900 background */
+  border-color: rgba(252, 165, 165, 0.3);
 }
 
 .info-icon:hover {
   opacity: 1;
-  background: #d97706;
+  background: #ef4444;
   color: var(--text-white) !important;
-  border-color: #d97706;
-  box-shadow: 0 0 8px rgba(217, 119, 6, 0.5);
+  border-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 .app-container.dark-theme .info-icon:hover {
-  background: #fbbf24;
-  color: #0f172a !important;
-  border-color: #fbbf24;
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+  background: #fca5a5;
+  color: #7f1d1d !important; /* Dark red text */
+  border-color: #fca5a5;
+  box-shadow: 0 0 8px rgba(252, 165, 165, 0.6);
 }
 
 .info-icon svg {

@@ -16,20 +16,6 @@
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="/src/style.css">
   
-  <!-- OpenCV.js Wasm Runtime Initialization Configuration -->
-  <script>
-    // Emscripten runtime config
-    var Module = {
-      onRuntimeInitialized: function() {
-        console.log("OpenCV.js runtime initialized.");
-        window.opencvReady = true;
-        document.dispatchEvent(new Event('opencv-ready'));
-      }
-    };
-  </script>
-  <!-- Load OpenCV.js 4.13 asynchronously (official build; honors the pre-defined global Module above) -->
-  <script src="https://docs.opencv.org/4.13.0/opencv.js" async type="text/javascript" id="opencv-js"
-          onerror="document.getElementById('loading-text') && (document.getElementById('loading-text').textContent = '載入 OpenCV.js 失敗，請檢查網路連線後重新整理頁面。')"></script>
 </head>
 <body>
 
@@ -366,6 +352,25 @@
                   </div>
                 </div>
 
+                <div class="control-subgroup">
+                  <span class="subgroup-label label-with-tooltip">
+                    圖層模式 (Layer Mode)
+                    <span class="info-icon" data-tooltip="【單一顏色】所有軌跡為選定色；【自動分層】最外圈線條為紅色（切割），內部孔洞細節為黑色/選定色（雕刻/標記）。適用於輪廓與邊緣模式。">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </span>
+                  </span>
+                  <div class="segmented-control mode-2-cols">
+                    <label class="segment-tab">
+                      <input type="radio" name="layer-mode" value="single" checked>
+                      <span class="segment-label">單一顏色</span>
+                    </label>
+                    <label class="segment-tab">
+                      <input type="radio" name="layer-mode" value="auto-layer">
+                      <span class="segment-label">自動分層</span>
+                    </label>
+                  </div>
+                </div>
+
                 <div class="size-scaler-container" style="margin-top: 8px;">
                   <label class="checkbox-label">
                     <input type="checkbox" id="checkbox-enable-size" checked>
@@ -457,7 +462,9 @@
                 </span>
               </div>
               <div class="canvas-container checkerboard">
-                <canvas id="output-canvas"></canvas>
+                <div id="canvas-preview-wrapper" class="preview-wrapper">
+                  <canvas id="output-canvas"></canvas>
+                </div>
                 <div id="empty-state-canvas" class="empty-state">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-state-icon">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>

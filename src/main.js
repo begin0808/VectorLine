@@ -8,6 +8,9 @@ let debounceTimeout = null;
 let lastSvgContent = ''; // For downloading
 let origImageData = null; // Cached original pixels for magic-wand flood fill
 let bgMask = null; // Uint8Array (w*h), 1 = removed background
+let magicUndoStack = []; // Mask snapshots for undo (回上一步)
+let magicRedoStack = []; // Mask snapshots for redo (到下一步)
+const MAGIC_HISTORY_MAX = 30;
 
 // DOM Elements
 const loadingScreen = document.getElementById('loading-screen');
@@ -209,9 +212,11 @@ function handleImageFile(file) {
       // Reset Zoom & Pan
       resetZoomAndPan();
 
-      // Cache original pixels & clear any previous background mask
+      // Cache original pixels & clear any previous background mask + history
       cacheOriginalPixels();
       bgMask = null;
+      magicUndoStack = [];
+      magicRedoStack = [];
 
       // Trigger processing
       triggerProcessing();
@@ -284,6 +289,8 @@ function resetImage() {
   if (typeof magicActive !== 'undefined') magicActive = false;
   origImageData = null;
   bgMask = null;
+  magicUndoStack = [];
+  magicRedoStack = [];
 }
 
 
@@ -1026,7 +1033,24 @@ const sliderMagicTol = document.getElementById('slider-magic-tol');
 const valMagicTol = document.getElementById('val-magic-tol');
 const btnMagicUndo = document.getElementById('btn-magic-undo');
 const btnMagicDone = document.getElementById('btn-magic-done');
+const btnMagicStepUndo = document.getElementById('btn-magic-step-undo');
+const btnMagicStepRedo = document.getElementById('btn-magic-step-redo');
 let magicActive = false;
+
+// Reflect undo/redo availability on the toolbar buttons
+function updateMagicHistoryButtons() {
+  if (btnMagicStepUndo) btnMagicStepUndo.disabled = magicUndoStack.length === 0;
+  if (btnMagicStepRedo) btnMagicStepRedo.disabled = magicRedoStack.length === 0;
+}
+
+// Save the current mask before a mutating action (click / clear); clears redo
+function pushMagicHistory() {
+  if (!bgMask) return;
+  magicUndoStack.push(bgMask.slice());
+  if (magicUndoStack.length > MAGIC_HISTORY_MAX) magicUndoStack.shift();
+  magicRedoStack = [];
+  updateMagicHistoryButtons();
+}
 
 // Paint the original image with masked pixels tinted red (marked for removal)
 function renderMagicCanvas() {
@@ -1080,6 +1104,7 @@ function openMagic() {
   magicCanvas.width = w;
   magicCanvas.height = h;
   renderMagicCanvas();
+  updateMagicHistoryButtons();
   magicLayer.classList.remove('hidden');
   btnMagicToggle.classList.add('active');
 }
@@ -1105,6 +1130,7 @@ if (magicCanvas) {
     const x = Math.floor((e.clientX - rect.left) / rect.width * origImageData.width);
     const y = Math.floor((e.clientY - rect.top) / rect.height * origImageData.height);
     if (x < 0 || y < 0 || x >= origImageData.width || y >= origImageData.height) return;
+    pushMagicHistory(); // snapshot before this click so it can be undone
     magicFloodFill(x, y, parseInt(sliderMagicTol.value));
     renderMagicCanvas();
     triggerProcessing();
@@ -1115,9 +1141,36 @@ if (sliderMagicTol) {
   sliderMagicTol.addEventListener('input', (e) => { valMagicTol.textContent = e.target.value; });
 }
 
+// Undo one step (回上一步)
+if (btnMagicStepUndo) {
+  btnMagicStepUndo.addEventListener('click', () => {
+    if (!magicUndoStack.length || !bgMask) return;
+    magicRedoStack.push(bgMask.slice());
+    bgMask = magicUndoStack.pop();
+    updateMagicHistoryButtons();
+    renderMagicCanvas();
+    triggerProcessing();
+  });
+}
+
+// Redo one step (到下一步)
+if (btnMagicStepRedo) {
+  btnMagicStepRedo.addEventListener('click', () => {
+    if (!magicRedoStack.length || !bgMask) return;
+    magicUndoStack.push(bgMask.slice());
+    bgMask = magicRedoStack.pop();
+    updateMagicHistoryButtons();
+    renderMagicCanvas();
+    triggerProcessing();
+  });
+}
+
+// Clear the entire mask (全部清除) — also undoable
 if (btnMagicUndo) {
   btnMagicUndo.addEventListener('click', () => {
-    if (bgMask) bgMask.fill(0);
+    if (!bgMask) return;
+    pushMagicHistory();
+    bgMask.fill(0);
     renderMagicCanvas();
     triggerProcessing();
   });

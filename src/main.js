@@ -874,19 +874,26 @@ function onProcessingFinished(outBuffer, pathsSvgHtml, pathsCount, totalNodes) {
     }
   }
 
-  const svgHeader = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${svgWidthAttr}" height="${svgHeightAttr}" style="aspect-ratio: ${width} / ${height};">\n`;
   const svgFooter = '</svg>';
+  // Download version keeps the physical (mm) size when enabled
+  const svgHeader = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${svgWidthAttr}" height="${svgHeightAttr}" style="aspect-ratio: ${width} / ${height};">\n`;
   lastSvgContent = svgHeader + pathsSvgHtml + svgFooter;
+
+  // Preview version always uses PIXEL dimensions so it renders at exactly the
+  // same displayed scale as the point-bitmap canvas (which is in px). Using the
+  // mm size here would make the two previews mismatch in size.
+  const previewHeader = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">\n`;
+  const previewSvgContent = previewHeader + pathsSvgHtml + svgFooter;
 
   // Render SVG image Blob URL dynamically
   if (svgPreview.src && svgPreview.src.startsWith('blob:')) {
     URL.revokeObjectURL(svgPreview.src);
   }
-  const blob = new Blob([lastSvgContent], { type: 'image/svg+xml;charset=utf-8' });
+  const blob = new Blob([previewSvgContent], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   svgPreview.src = url;
-  
-  // Set width/height attributes to preserve layout ratio
+
+  // Match the canvas: let CSS (object-fit) size it; keep the natural ratio
   svgPreview.style.width = '';
   svgPreview.style.height = '';
   svgPreview.setAttribute('width', width);

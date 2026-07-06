@@ -243,7 +243,20 @@ body {
   letter-spacing: -0.5px;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+/* Latin sub-wordmark next to the Chinese brand name */
+.brand-latin {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+  -webkit-text-fill-color: var(--text-dark);
+  color: var(--text-dark);
 }
 
 .badge {

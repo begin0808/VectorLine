@@ -1,4 +1,4 @@
-# VectorLine（向量線條生成器）— 圖片轉雷切/雷雕專用 SVG 線稿工具
+# 描線工坊 VectorLine — 圖片轉雷切/雷雕專用 SVG 線稿工具
 
 [English Version](README.md) | [繁體中文](README.zh-TW.md)
 
@@ -8,7 +8,7 @@
 
 ---
 
-**VectorLine** 是一款免費、開源的網頁工具，能將照片與數位圖檔轉換為適用於**雷射切割與雕刻**的向量線稿。所有運算皆透過 [OpenCV.js](https://docs.opencv.org/)（WebAssembly）在你的瀏覽器本地執行 —— 不上傳、無伺服器、不收集任何資料。
+**描線工坊（VectorLine）** 是一款免費、開源的網頁工具，能將照片與數位圖檔轉換為適用於**雷射切割與雕刻**的向量線稿。所有運算皆透過 [OpenCV.js](https://docs.opencv.org/)（WebAssembly）在你的瀏覽器本地執行 —— 不上傳、無伺服器、不收集任何資料。
 
 ## 功能特色
 

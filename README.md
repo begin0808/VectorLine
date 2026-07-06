@@ -1,4 +1,4 @@
-# VectorLine — Image-to-SVG Line Art for Laser Cutting & Engraving
+# 描線工坊 VectorLine — Image-to-SVG Line Art for Laser Cutting & Engraving
 
 [English Version](README.md) | [繁體中文](README.zh-TW.md)
 
@@ -8,7 +8,7 @@
 
 ---
 
-**VectorLine** is a free, open-source web app that converts photos and digital images into vector line art for **laser cutting and engraving**. All processing runs locally in your browser using [OpenCV.js](https://docs.opencv.org/) (WebAssembly) — no uploads, no server, no data collection.
+**描線工坊 (VectorLine)** is a free, open-source web app that converts photos and digital images into vector line art for **laser cutting and engraving**. All processing runs locally in your browser using [OpenCV.js](https://docs.opencv.org/) (WebAssembly) — no uploads, no server, no data collection.
 
 ## Features
 

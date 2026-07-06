@@ -51,6 +51,14 @@
         <p class="subtitle">完全開源、免費、瀏覽器本地運算，一鍵將圖片轉換為雷雕/雷切專用 SVG 線條路徑</p>
       </div>
       <div class="header-right">
+        <button id="btn-help" class="btn-help" title="使用技巧與參數說明">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>使用技巧</span>
+        </button>
         <button id="btn-theme-toggle" class="btn-theme-toggle" title="切換深淺色模式">
           <!-- Sun icon -->
           <svg class="sun-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -202,6 +210,19 @@
                   <input type="range" id="slider-contrast" min="-100" max="100" step="5" value="0">
                 </div>
                 
+                <div class="slider-wrapper">
+                  <div class="slider-header">
+                    <span class="label-with-tooltip">
+                      亮部去背 (White Cutoff)
+                      <span class="info-icon" data-tooltip="把亮度高於此值的區域直接壓成純白，快速清除淺色紙張紋理、陰影與背景雜點。數值越低清得越多；255 為關閉。適合淺色/白底圖片。">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      </span>
+                    </span>
+                    <span id="val-white-cutoff" class="slider-val">關閉</span>
+                  </div>
+                  <input type="range" id="slider-white-cutoff" min="150" max="255" step="5" value="255">
+                </div>
+
                 <div class="checkbox-wrapper">
                   <label class="checkbox-label">
                     <input type="checkbox" id="checkbox-invert-binary">
@@ -478,6 +499,12 @@
                 <span class="info-icon tooltip-right" data-tooltip="「點陣點點圖」由像素點組成，放大會有鋸齒馬賽克。適合雷射機進行點陣掃描，儲存對應為「下載 PNG 線條圖」。">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 </span>
+                <button id="btn-magic-toggle" class="btn-pane-tool" type="button" title="魔術棒去背：點擊背景區域即可清除" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M15 9h.01M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"></path>
+                  </svg>
+                  <span>魔術棒去背</span>
+                </button>
                 <button id="btn-compare-toggle" class="btn-pane-tool" type="button" title="與原圖對比" disabled>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="4" width="18" height="16" rx="2"></rect>
@@ -490,6 +517,23 @@
                 <div id="canvas-preview-wrapper" class="preview-wrapper">
                   <canvas id="output-canvas"></canvas>
                 </div>
+                <!-- Magic-wand background removal overlay -->
+                <div id="magic-layer" class="magic-layer hidden">
+                  <div class="magic-canvas-wrap">
+                    <canvas id="magic-canvas"></canvas>
+                  </div>
+                  <div class="magic-toolbar">
+                    <span class="magic-hint">🪄 點擊要清除的背景區域</span>
+                    <div class="magic-tol">
+                      <span>容差</span>
+                      <input type="range" id="slider-magic-tol" min="5" max="120" step="5" value="35">
+                      <span id="val-magic-tol">35</span>
+                    </div>
+                    <button id="btn-magic-undo" class="magic-btn" type="button">還原</button>
+                    <button id="btn-magic-done" class="magic-btn magic-btn-primary" type="button">完成</button>
+                  </div>
+                </div>
+
                 <!-- Before / After comparison overlay -->
                 <div id="compare-layer" class="compare-layer hidden">
                   <div id="compare-frame" class="compare-frame">
@@ -550,6 +594,98 @@
     <footer class="app-footer">
       <p>© 2026 <a href="https://begin0808.github.io/studio0808/" target="_blank" class="footer-link">Studio0808 智造實驗室</a>. All rights reserved. &nbsp;&nbsp; <a href="mailto:begin0808@gmail.com" class="footer-link">✉ 寫信給我</a></p>
     </footer>
+  </div>
+
+  <!-- Help / Tips Modal -->
+  <div id="help-modal" class="help-modal hidden">
+    <div class="help-backdrop" id="help-backdrop"></div>
+    <div class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="help-header">
+        <h2 id="help-title">🛠️ 使用技巧與疑難排解</h2>
+        <button id="btn-help-close" class="help-close" title="關閉">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="help-body">
+        <p class="help-intro">下面是常見情況的處理方法。本工具是<strong>參數式</strong>調整，搭配<strong>魔術棒去背</strong>即可解決大多數問題，不需另外開修圖軟體。</p>
+
+        <div class="help-card">
+          <div class="help-card-title">🔴 畫面有很多黑點／雜訊</div>
+          <p>常見於深色漸層背景、掃描紙張紋理或陰影。依序嘗試：</p>
+          <ul>
+            <li><b>先按「手繪相片最佳化」預設</b>，多半一鍵改善。</li>
+            <li><b>魔術棒去背</b>（預覽區左上）：直接點背景區域整片清除，最適合單一色背景。</li>
+            <li><b>亮部去背</b>（濾波預處理）：淺色背景往下拉即可壓白。</li>
+            <li><b>影像亮度 +30～+60</b>：把暗背景洗白，從源頭消除雜點。</li>
+            <li><b>形態學去雜點 1～2</b>（二值化）：擦掉細小點，連點陣圖也變乾淨。</li>
+            <li><b>過濾雜點面積 100～300</b>（向量優化）：丟掉小碎塊，<i>只清 SVG 向量</i>。</li>
+          </ul>
+          <p class="help-warn">⚠️ 這幾項調太大會連小字筆畫一起吃掉，請小幅遞增。</p>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">✏️ 手繪鉛筆線太淡、抓不到線</div>
+          <ul>
+            <li><b>影像對比 +30～+60</b>：拉大黑白分界。</li>
+            <li><b>影像亮度 −10～−30</b>：加深過淡的線條。</li>
+            <li><b>臨界分界偏置 (C) 調低</b>：線變粗、細節變多。</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">〰️ 線條斷斷續續、有缺口</div>
+          <ul>
+            <li><b>形態學去雜點 1～2</b>：填補主線微小斷裂。</li>
+            <li><b>雙邊濾波強度</b>調低，避免線被糊掉。</li>
+            <li>切割用途建議搭配<b>單線 (Centerline)</b> 模式沿中線切。</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">📦 SVG 檔太大、節點太多、雷切機跑很慢</div>
+          <ul>
+            <li><b>節點簡化程度</b>調高（1.5～3）：節點變少、檔案更小。</li>
+            <li><b>曲線平滑</b>打開：折線轉貝茲曲線，機器更順。</li>
+            <li><b>過濾雜點面積</b>調高：去掉大量小碎塊。</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">🌓 黑底白字／深色背景圖</div>
+          <ul>
+            <li>勾選<b>反轉黑白顏色 (Invert Colors)</b>。</li>
+            <li>再視情況用<b>魔術棒去背</b>清掉背景。</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">✂️ 只要外框切割、內部當雕刻</div>
+          <ul>
+            <li><b>圖層模式 → 自動分層</b>：最外圈紅色(切割)、內部黑色(雕刻)。</li>
+            <li>匯出 <b>DXF</b> 會自動分成 <code>CUT</code> / <code>ENGRAVE</code> 兩圖層。</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">🪄 魔術棒去背怎麼用？</div>
+          <ul>
+            <li>點預覽區左上「<b>魔術棒去背</b>」→ 左側會顯示原圖。</li>
+            <li><b>點一下背景</b>，相近顏色的整片區域會被清除（標成紅色）。</li>
+            <li>拉「<b>容差</b>」控制一次清除的顏色範圍；可連續點多處累加。</li>
+            <li><b>還原</b>清空選取、<b>完成</b>離開（清除結果會保留並套用）。</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-title">📐 想要正確的實體尺寸</div>
+          <ul>
+            <li>在<b>輸出規格</b>勾選「啟用實體尺寸標記」，填入寬度(mm)，高度自動等比。</li>
+            <li>SVG／DXF 都會帶 mm 尺寸，匯入 Beam Studio / LightBurn 免重縮。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Main JavaScript App -->

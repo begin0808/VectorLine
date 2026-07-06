@@ -6,6 +6,8 @@ let imgElement = document.createElement('img');
 let originalFile = null;
 let debounceTimeout = null;
 let lastSvgContent = ''; // For downloading
+let origImageData = null; // Cached original pixels for magic-wand flood fill
+let bgMask = null; // Uint8Array (w*h), 1 = removed background
 
 // DOM Elements
 const loadingScreen = document.getElementById('loading-screen');
@@ -203,10 +205,14 @@ function handleImageFile(file) {
       
       // Calculate physical height
       updatePhysicalHeight();
-      
+
       // Reset Zoom & Pan
       resetZoomAndPan();
-      
+
+      // Cache original pixels & clear any previous background mask
+      cacheOriginalPixels();
+      bgMask = null;
+
       // Trigger processing
       triggerProcessing();
     };
@@ -269,6 +275,15 @@ function resetImage() {
   if (compareLayerEl) compareLayerEl.classList.add('hidden');
   if (typeof compareActive !== 'undefined') compareActive = false;
   if (compareBtn) compareBtn.classList.remove('active');
+
+  // Disable & close the magic-wand tool; drop cached pixels/mask
+  const magicBtn = document.getElementById('btn-magic-toggle');
+  if (magicBtn) { magicBtn.disabled = true; magicBtn.classList.remove('active'); }
+  const magicLayerEl = document.getElementById('magic-layer');
+  if (magicLayerEl) magicLayerEl.classList.add('hidden');
+  if (typeof magicActive !== 'undefined') magicActive = false;
+  origImageData = null;
+  bgMask = null;
 }
 
 
@@ -314,6 +329,15 @@ sliderBrightness.addEventListener('input', (e) => {
 
 sliderContrast.addEventListener('input', (e) => {
   valContrast.textContent = e.target.value > 0 ? `+${e.target.value}` : e.target.value;
+  triggerProcessing();
+});
+
+// White cutoff (background removal by luminance)
+const sliderWhiteCutoff = document.getElementById('slider-white-cutoff');
+const valWhiteCutoff = document.getElementById('val-white-cutoff');
+sliderWhiteCutoff.addEventListener('input', (e) => {
+  const v = parseInt(e.target.value);
+  valWhiteCutoff.textContent = v >= 255 ? '關閉' : v;
   triggerProcessing();
 });
 
@@ -619,6 +643,7 @@ function refreshCompareImages() {
 
 function openCompare() {
   if (!originalFile) return;
+  if (typeof magicActive !== 'undefined' && magicActive) closeMagic();
   compareActive = true;
   refreshCompareImages();
   setComparePct(50);
@@ -694,6 +719,8 @@ btnResetDefaults.addEventListener('click', () => {
   sizeInputsWrapper.classList.remove('disabled-controls');
   inputPhysWidth.value = 150;
   checkboxInvertBinary.checked = false;
+  sliderWhiteCutoff.value = 255;
+  valWhiteCutoff.textContent = '關閉';
   updatePhysicalHeight();
   resetZoomAndPan();
 });
@@ -730,6 +757,17 @@ function processImage() {
   tempCtx.drawImage(imgElement, 0, 0);
   const imgData = tempCtx.getImageData(0, 0, width, height);
 
+  // Apply magic-wand background removal mask (masked pixels forced to white)
+  if (bgMask && bgMask.length === width * height) {
+    const d = imgData.data;
+    for (let i = 0; i < bgMask.length; i++) {
+      if (bgMask[i]) {
+        const j = i * 4;
+        d[j] = 255; d[j + 1] = 255; d[j + 2] = 255; d[j + 3] = 255;
+      }
+    }
+  }
+
   // Extract all slider/configuration values
   const denoise = sliderDenoise.value;
   const blocksize = sliderBlocksize.value;
@@ -739,6 +777,7 @@ function processImage() {
   const morphClean = sliderMorphClean.value;
   const brightness = sliderBrightness.value;
   const contrast = sliderContrast.value;
+  const whiteCutoff = sliderWhiteCutoff.value;
   const invert = checkboxInvertBinary.checked;
   const smooth = checkboxSmooth.checked;
 
@@ -784,6 +823,7 @@ function processImage() {
     morphClean,
     brightness,
     contrast,
+    whiteCutoff,
     invert,
     smooth,
     svgColor,
@@ -865,6 +905,8 @@ function onProcessingFinished(outBuffer, pathsSvgHtml, pathsCount, totalNodes) {
   // Enable the before/after compare tool now that we have output
   const compareBtn = document.getElementById('btn-compare-toggle');
   if (compareBtn) compareBtn.disabled = false;
+  const magicBtn = document.getElementById('btn-magic-toggle');
+  if (magicBtn) magicBtn.disabled = false;
   // Keep the comparison overlay in sync if it is currently open
   if (typeof compareActive !== 'undefined' && compareActive) {
     refreshCompareImages();
@@ -955,6 +997,144 @@ tabTriggers.forEach(trigger => {
       }
     });
   });
+});
+
+// ----------------------------------------------------
+// Magic-wand background removal
+// ----------------------------------------------------
+function cacheOriginalPixels() {
+  const w = imgElement.naturalWidth, h = imgElement.naturalHeight;
+  if (!w || !h) { origImageData = null; return; }
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const cx = c.getContext('2d', { willReadFrequently: true });
+  cx.drawImage(imgElement, 0, 0);
+  origImageData = cx.getImageData(0, 0, w, h);
+}
+
+const btnMagicToggle = document.getElementById('btn-magic-toggle');
+const magicLayer = document.getElementById('magic-layer');
+const magicCanvas = document.getElementById('magic-canvas');
+const sliderMagicTol = document.getElementById('slider-magic-tol');
+const valMagicTol = document.getElementById('val-magic-tol');
+const btnMagicUndo = document.getElementById('btn-magic-undo');
+const btnMagicDone = document.getElementById('btn-magic-done');
+let magicActive = false;
+
+// Paint the original image with masked pixels tinted red (marked for removal)
+function renderMagicCanvas() {
+  if (!origImageData || !bgMask) return;
+  const w = origImageData.width, h = origImageData.height;
+  const ctx = magicCanvas.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  img.data.set(origImageData.data);
+  const d = img.data;
+  for (let i = 0; i < bgMask.length; i++) {
+    if (bgMask[i]) {
+      const j = i * 4;
+      d[j] = 255; d[j + 1] = 90; d[j + 2] = 90; d[j + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// Flood fill from (sx,sy) over pixels within colour tolerance of the seed
+function magicFloodFill(sx, sy, tol) {
+  const w = origImageData.width, h = origImageData.height;
+  const data = origImageData.data;
+  const seedP = (sy * w + sx);
+  const s = seedP * 4;
+  const sr = data[s], sg = data[s + 1], sb = data[s + 2];
+  const visited = new Uint8Array(w * h);
+  const stack = [seedP];
+  visited[seedP] = 1;
+  while (stack.length) {
+    const p = stack.pop();
+    const q = p * 4;
+    const dr = Math.abs(data[q] - sr);
+    const dg = Math.abs(data[q + 1] - sg);
+    const db = Math.abs(data[q + 2] - sb);
+    if (Math.max(dr, dg, db) > tol) continue;
+    bgMask[p] = 1;
+    const x = p % w, y = (p / w) | 0;
+    if (x > 0 && !visited[p - 1]) { visited[p - 1] = 1; stack.push(p - 1); }
+    if (x < w - 1 && !visited[p + 1]) { visited[p + 1] = 1; stack.push(p + 1); }
+    if (y > 0 && !visited[p - w]) { visited[p - w] = 1; stack.push(p - w); }
+    if (y < h - 1 && !visited[p + w]) { visited[p + w] = 1; stack.push(p + w); }
+  }
+}
+
+function openMagic() {
+  if (!originalFile || !origImageData) return;
+  if (typeof compareActive !== 'undefined' && compareActive) closeCompare();
+  magicActive = true;
+  const w = origImageData.width, h = origImageData.height;
+  if (!bgMask || bgMask.length !== w * h) bgMask = new Uint8Array(w * h);
+  magicCanvas.width = w;
+  magicCanvas.height = h;
+  renderMagicCanvas();
+  magicLayer.classList.remove('hidden');
+  btnMagicToggle.classList.add('active');
+}
+
+function closeMagic() {
+  magicActive = false;
+  magicLayer.classList.add('hidden');
+  btnMagicToggle.classList.remove('active');
+}
+
+if (btnMagicToggle) {
+  btnMagicToggle.addEventListener('click', () => {
+    if (magicActive) closeMagic();
+    else openMagic();
+  });
+}
+
+if (magicCanvas) {
+  magicCanvas.addEventListener('click', (e) => {
+    if (!magicActive || !origImageData) return;
+    const rect = magicCanvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const x = Math.floor((e.clientX - rect.left) / rect.width * origImageData.width);
+    const y = Math.floor((e.clientY - rect.top) / rect.height * origImageData.height);
+    if (x < 0 || y < 0 || x >= origImageData.width || y >= origImageData.height) return;
+    magicFloodFill(x, y, parseInt(sliderMagicTol.value));
+    renderMagicCanvas();
+    triggerProcessing();
+  });
+}
+
+if (sliderMagicTol) {
+  sliderMagicTol.addEventListener('input', (e) => { valMagicTol.textContent = e.target.value; });
+}
+
+if (btnMagicUndo) {
+  btnMagicUndo.addEventListener('click', () => {
+    if (bgMask) bgMask.fill(0);
+    renderMagicCanvas();
+    triggerProcessing();
+  });
+}
+
+if (btnMagicDone) {
+  btnMagicDone.addEventListener('click', () => closeMagic());
+}
+
+// ----------------------------------------------------
+// Help / Tips modal
+// ----------------------------------------------------
+const btnHelp = document.getElementById('btn-help');
+const helpModal = document.getElementById('help-modal');
+const btnHelpClose = document.getElementById('btn-help-close');
+const helpBackdrop = document.getElementById('help-backdrop');
+
+if (btnHelp) btnHelp.addEventListener('click', () => helpModal.classList.remove('hidden'));
+if (btnHelpClose) btnHelpClose.addEventListener('click', () => helpModal.classList.add('hidden'));
+if (helpBackdrop) helpBackdrop.addEventListener('click', () => helpModal.classList.add('hidden'));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && helpModal && !helpModal.classList.contains('hidden')) {
+    helpModal.classList.add('hidden');
+  }
 });
 
 // OpenCV.js is managed inside the Web Worker automatically

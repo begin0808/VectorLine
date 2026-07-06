@@ -164,6 +164,16 @@ self.onmessage = function(e) {
         gray.convertTo(gray, -1, alpha, beta);
       }
 
+      // White background cutoff — force bright pixels to pure white to remove
+      // light paper texture / shadow speckle before thresholding.
+      const whiteCutoff = parseInt(params.whiteCutoff);
+      if (whiteCutoff > 0 && whiteCutoff < 255) {
+        let wmask = new cv.Mat();
+        cv.threshold(gray, wmask, whiteCutoff, 255, cv.THRESH_BINARY);
+        gray.setTo(new cv.Scalar(255), wmask);
+        wmask.delete();
+      }
+
       // Denoise (Gaussian Blur)
       blurred = new cv.Mat();
       const denoiseVal = parseInt(params.denoise);
